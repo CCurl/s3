@@ -2,7 +2,7 @@
 
 ## What is s3?
 The following statements can be made about s3. 
-
+```
 s3 ...
 
 ... is a full-featured, interactive, stack-based, interpreter/VM, implemented in under 250 lines of C code.
@@ -16,7 +16,7 @@ s3 ...
 ... runs under Windows
 ... runs under Linux
 ... TODO: runs on development boards via the Arduino IDE
-
+```
 ## Why s3?
 Many interpreted environments a large SWITCH statement with cases in a loop to execute the user's program. In these systems, the the "machine code"'s opcodes (the cases in the SWITCH statement) are often arbitrarily assigned and are not human-readable, so they have no meaning to the programmer when looking at the code that is actually being executed. Additionally a compiler and/or interpreter are included to create and execute the programs in that environment. In these enviromnents, there is a steep learning curve ... the programmer needs to learn the programming language, the hundreds (or thousands) of user functions in the libraries (or "WORDS" in Forth), how to use the compiler, and how to use the interpreter. I wanted to avoid as much as that as possible, and have only one thing to learn: the "machine code".
 
