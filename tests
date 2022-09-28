@@ -1,0 +1,25 @@
+xX
+:CR 13,10,;
+:Code 0@1[nc@#58=(n1-c@59=(13,10,),];
+:YN #("y")~("n");
+:Regs "(Regs:Todo)";
+:HelloWorld "hello world!";
+:Locs s3 s4 i3 d4 r3 r4 + "locals: %d";
+:Ver "s3 v0.0.1";
+:Bench xT$ 0[] Elapsed;
+:Elapsed xT$-." usecs";
+:Mil 1000#**;
+:Benches 0 [# Mil Bench CR ]\;
+:ULTestD "UnloopTest-DO: " 100 1[n .b n 23=("-out"xU^)] "ERROR!";
+:ULTestW "UnloopTest-WHILE: " 100{# 73=("-out"\xU^)# .b 1-#} "ERROR!";
+:Reload 1000#|tests|\xL;
+Ver
+CR Regs
+CR HelloWorld
+CR 1 YN 0 YN
+CR 111 222 Locs
+CR 50 Mil Bench
+CR ULTestD
+CR ULTestW
+CR Code CR
+0(xQ)
