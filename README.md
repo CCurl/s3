@@ -1,7 +1,9 @@
 # s3 - A minimal interpreter for PCs and Development boards
 
 ## What is s3?
-The following statements can be made about s3. s3 ...
+The following statements can be made about s3. 
+
+s3 ...
 
 ... is a full-featured, interactive, stack-based, interpreter/VM, implemented in under 250 lines of C code.
 ... has 100% human-readable (and understandable!) "machine code".
