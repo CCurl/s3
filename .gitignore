@@ -2,3 +2,6 @@ s3
 h.txt
 history.txt
 sandbox
+/Debug
+/Release
+/s3.vcxproj.user
