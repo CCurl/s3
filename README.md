@@ -215,6 +215,13 @@ xU    (--)        UNLOOP: Unwind the LOOP stack
 (     (f--)       IF: if (f == 0), skip to next ')'.
 
 
+*** FILES ***
+fO    (a m--h)    Open: a=filename, m=mode (0=read, else write), h=handle
+fC    (h--)       Close: h=handle
+fR    (h--c n)    Read: h=handle, c=char, n=0 if error/eof, else 1
+fW    (c h--)     Write: h=handle, c=char
+
+
 *** OTHER ***
 xL    (a--)       Load from file a (eg - 1000#|tests|\xL).
 xPI   (p--)       Arduino: Pin Input  (pinMode(p, INPUT))
