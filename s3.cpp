@@ -55,16 +55,17 @@ void dotQ(int delim) {
         if (c == '%') {
             c = *(y++); if (delim) { ++p; }
             if (c=='d') { printf("%ld", POP); }
+            else if (c=='c') { putC((int)POP); }
+            else if (c=='e') { putC(27); }
+            else if (c=='f') { printf("%g", st.f[s--]); }
+            else if (c=='n') { putC(13); putC(10); }
+            else if (c=='q') { putC('"'); }
             else if (c=='X') { printf("%lX", POP); }
             else if (c=='x') { printf("%lx", POP); }
-            else if (c=='c') { putC((int)POP); }
-            else if (c=='n') { putC(13); putC(10); }
-            else if (c=='e') { putC(27); }
-            else if (c=='q') { putC('"'); }
             else { putC(c); }
-        }
-        else { putC(c); }
-    } if (delim) { ++p; }
+        } else { putC(c); }
+    }
+    if (delim) { ++p; }
 }
 /* <33 */ void X() { if (u && (u != 10)) printf("-IR %ld (%c)?", u, (char)u); p = 0; }
 /* ' ' */ void N() {}
@@ -164,7 +165,7 @@ void dotQ(int delim) {
 /*  x  */ void fExt() { u = stb[p++];
         if (u == '%') { NOS %= TOS; s--; } // MOD
         else if (u == ']') { u=(R0<R1)?1:0; R0+=POP; fLoopS(u); } // +LOOP
-        else if (u == 'R') { sd=sd?sd:(long)&cb; // RAND
+        else if (u == 'R') { if (!sd) { sd=(long)(cb+y)+clock(); } // RAND
             sd=(sd<<13)^sd; sd=(sd>>17)^sd; sd = (sd<<5)^sd;
             PUSH=sd; } 
         else if (u == 'L') { fLoad(); } // ABS

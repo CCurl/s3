@@ -118,9 +118,22 @@ b~  (a--b)        b: NOT a (ones-complement, e.g - 101011 => 010100)
 $  (a b--b a)     Swap top 2 stack items           (SWAP)
 %  (a b--a b a)   Push 2nd                         (OVER)
 _  (a--b)         b: -a                            (Negate)
-a  (a--b)         b: abs(a)                        (Absolute)
+a  (a--b)         b: ABS(a)                        (Absolute)
 i  (x--y)         y: x+1                           (Increment)
 d  (x--y)         y: x-1                           (Decrement)
+
+
+*** FLOATING POINT ***
+ff    (n--F)      n: integer, F: float
+fi    (F--n)      F: float, n: integer
+f@    (a--F)      Fetch float F from address a
+f!    (F a--)     Store float F to address a
+f+    (a b--n)    n: a+b - addition
+f-    (a b--n)    n: a-b - subtraction
+f*    (a b--n)    n: a*b - multiplication
+f<    (a b--f)    f: (a < b) ? 1 : 0;
+f>    (a b--f)    f: (a > b) ? 1 : 0;
+f.    (F--)       Output F
 
 
 *** MEMORY ***
@@ -149,31 +162,34 @@ dC    (--)        Decrement register C
 
 *** WORDS/FUNCTIONS ***
         NOTE: Word names are variable-length alphabetic (A-z) and start with a Capital letter.
-:     (--)        Define word. Copy chars to (HERE++) until closing ';'.
+:Abc  (--)        Define word Abc. Copy chars to (HERE++) until next ';'.
 Abc   (--)        Execute/call word Abc
-;     (--)        End of word definition. Also Exit word.
+;     (--)        End of word definition.
 ^     (--)        Exit word.
         NOTE: To exit a word while inside of a loop, use 'xU^'.
               example: :LoopTest 100 0[n. n32=("-out" xU^)", "];
+?Abc  (--a)       a: address of Abc, 0 if not defined
 
 
 *** INPUT/OUTPUT ***
-NNN   (--n)       Scan DECIMAL number. For multiple numbers, separate them by space (47 33).
+NNN    (--n)      Scan DECIMAL number. For multiple numbers, separate them by space (47 33).
         NOTEs: (1) To enter a negative number, use "negate" (eg - 490_).
                (2) To enter a float, end with 'e' (eg - 1234e).
 'x     (--n)      n: the ASCII value of x
 hXXX   (--h)      Scan XXX as a HEX number (0-9, A-F, a-f).
 .      (N--)      Output N as decimal number.
+f.     (F--)      Output F as floating point number.
 ,      (N--)      Output N an ASCII character.
-b       (--)      Output a single SPACE.
+b      (--)       Output a single SPACE.
 "      (?--?)     Output a formatted string until the next '"'.
     NOTES: - %d outputs TOS as an integer
+           - %c outputs TOS as a character
+           - %e outputs an ESCAPE (27)
+           - %f outputs TOS as a float
+           - %n outputs CR/LF
+           - %q outputs a QUOTE
            - %X outputs TOS as a hex number (A-F are uppercase)
            - %x outputs TOS as a hex number (A-F are lowercase)
-           - %c outputs TOS as a character
-           - %n outputs CR/LF
-           - %e outputs an ESCAPE (27)
-           - %q outputs a QUOTE
            - %<x> outputs <x> (eg - %% outputs %)
 `XXX`  (--)       Calls system("XXX").
 xY     (a--)      Calls system(a).
