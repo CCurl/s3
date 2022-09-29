@@ -35,8 +35,8 @@ void init() {
 }
 int funcN(int x) { 
     unsigned long hh = 5381;
-    // while (btw(stb[x], 'A', 'Z') || btw(stb[x], 'a', 'z') || (btw(stb[x], '0', '9')) || stb[x] == '_') {
-    while (btw(stb[x], 'A', 'Z') || btw(stb[x], 'a', 'z')) {
+    while (btw(stb[x], 'A', 'Z') || btw(stb[x], 'a', 'z') || (btw(stb[x], '0', '9'))) {
+    // while (btw(stb[x], 'A', 'Z') || btw(stb[x], 'a', 'z')) {
             hh=((hh<<5)^hh)+(stb[x++]-'A');
     }
     fn=(hh & MAX_FN); fa=funcs[fn];
