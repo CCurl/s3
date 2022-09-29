@@ -118,7 +118,7 @@ b~  (a--b)        b: NOT a (ones-complement, e.g - 101011 => 010100)
 $  (a b--b a)     Swap top 2 stack items           (SWAP)
 %  (a b--a b a)   Push 2nd                         (OVER)
 _  (a--b)         b: -a                            (Negate)
-xA (a--b)         b: abs(a)                        (Absolute)
+a  (a--b)         b: abs(a)                        (Absolute)
 i  (x--y)         y: x+1                           (Increment)
 d  (x--y)         y: x-1                           (Decrement)
 

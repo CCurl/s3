@@ -17,6 +17,7 @@
 #define FSZ        10
 #define MAX_FN  0x3FF
 #define putC(ch) putc(ch, stdout)
+#define getC() fgetc(stdin)
 
 union fib { float f[ISZ]; long i[ISZ]; }; static union fib st;
 static char *y, stb[BSZ]; 
@@ -92,9 +93,9 @@ void dotQ(int delim) {
 /*  <  */ void fLT() { NOS= (NOS<TOS) ? -1:0; s--; }
 /*  =  */ void fEq() { NOS= (NOS==TOS)? -1:0; s--; }
 /*  <  */ void fGT() { NOS= (NOS>TOS) ? -1:0; s--; }
-/*  ?  */ void fKey() { c = fgetc(stdin); PUSH = (c != EOF) ? c : 0; }
+/*  ?  */ void fLookup() { p=funcN(p); PUSH=fa; }
 /*  @  */ void fFetch() { TOS = st.i[TOS]; }
-/* A-Z */ void AZ() { p=funcN(p-1); if (fn) { st.i[--r]=p; p=fa; } }
+/* A-Z */ void AZ() { p=funcN(p-1); if (fa) { st.i[--r]=p; p=fa; } }
 /*  \  */ void fDrop() { --s; }
 /*  [  */ void fDo() { r -= 3; st.i[r+2]=p; st.i[r]=POP; st.i[r+1]=POP; }
 /* n/a */ void fLoopS(int x) { if ((x==1) && (R0<R1)) { p=st.i[r+2]; return; }
@@ -106,6 +107,7 @@ void dotQ(int delim) {
 /*  `  */ void fSys() { c = BSZ-100; t=c;
         while ((31 < stb[p]) && (stb[p] != '`')) { stb[t++] = stb[p++]; }
         stb[t]=0; ++p; PUSH=(long)&stb[c]; fSystem(); }
+/*  a  */ void fAbs() { TOS=(TOS<0)?-TOS:TOS; }
 /*  b  */ void fBit() {
     u = stb[p++]; if (u == '~') { TOS = ~TOS; }
     else if (u == '&') { NOS &= TOS; s--; }
@@ -147,6 +149,8 @@ void dotQ(int delim) {
         else { --p; ++TOS; } }
 /*  l  */ void fLoc() { u=stb[p++]; if (u=='+') { lb += (lb < 185) ? 10 : 0; }
             else if (u=='-') { lb -= (125 < lb) ? 10 : 0; } }
+/*  k  */ void fKey() { u=stb[p++]; if (u=='?') { PUSH = 0; /*TODO!*/ }
+            else if (u=='@') { PUSH = getC(); } }
 /*  m  */ void fMOp() { u=stb[p++]; if (u=='@') { TOS=*(char*)TOS; } } // else if (u=='!') { *(char*)TOS=(char)NOS; s-=2; } }
 /*  n  */ void fIndex() { PUSH = R0; }
 /*  q  */ void fDotS() { for (int i = sb; i <= s; i++) { printf("%c%ld", (i == sb) ? 0 : 32, st.i[i]); } }
@@ -157,14 +161,12 @@ void dotQ(int delim) {
         if (btw(u, 'A', 'Z')) { st.i[u+32]=t; } 
         else if (btw(u, '0', '9')) { st.i[lb+u-'0']=t; } }
 /*  t  */ void fType() { y=(char*)&stb[POP]; puts(y); }
-/*  u  */ void fUser() { p=funcN(p); if (fa) { st.i[--r]=p; p=fa; } }
 /*  x  */ void fExt() { u = stb[p++];
         if (u == '%') { NOS %= TOS; s--; } // MOD
         else if (u == ']') { u=(R0<R1)?1:0; R0+=POP; fLoopS(u); } // +LOOP
         else if (u == 'R') { sd=sd?sd:(long)&cb; // RAND
             sd=(sd<<13)^sd; sd=(sd>>17)^sd; sd = (sd<<5)^sd;
             PUSH=sd; } 
-        else if (u == 'A') { TOS=(TOS<0)?-TOS:TOS; } // ABS
         else if (u == 'L') { fLoad(); } // ABS
         else if (u == 'Y') { TOS=(long)&stb[TOS]; fSystem(); } // system
         else if (u == 'T') { PUSH = clock(); } // TIMER/MILLIS
@@ -179,13 +181,13 @@ void dotQ(int delim) {
 /*  }  */ void fWhile() { if (POP) { p=R0; } else { r+=3; } }
 /*  ~  */ void fLNot() { TOS=(TOS)?0:-1; }
 void (*q[128])() = { 
-    X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X, // 0:31
-    N,fStore,fDotQ,fDup,fSwap,fOver,fSlMod,fAscii,fIf,N,fMult,fAdd,fEmit,fSub,fDot,fDiv, // 32:47
-    n09,n09,n09,n09,n09,n09,n09,n09,n09,n09,fCreate,fRet,fLT,fEq,fGT,fKey, // 48:63
-    fFetch,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ, // 64:79
-    AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,fDo,fDrop,fLoop,fLeave,fNeg, // 80:95
-    fSys,X,fBit,fCOp,fRegDec,fExec,fFloat,X,fHex,fRegInc,X,X,fLoc,fMOp,fIndex,X, // 96:111
-    X,fDotS,fRegGet,fRegSet,fType,fUser,X,X,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X }; // 112:127
+    X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,                     //   0:31
+    N,fStore,fDotQ,fDup,fSwap,fOver,fSlMod,fAscii,fIf,N,fMult,fAdd,fEmit,fSub,fDot,fDiv, //  32:47
+    n09,n09,n09,n09,n09,n09,n09,n09,n09,n09,fCreate,fRet,fLT,fEq,fGT,fLookup,            //  48:63
+    fFetch,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,                                 //  64:79
+    AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,fDo,fDrop,fLoop,fLeave,fNeg,                        //  80:95
+    fSys,fAbs,fBit,fCOp,fRegDec,fExec,fFloat,X,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,   //  96:111
+    X,fDotS,fRegGet,fRegSet,fType,X,X,X,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };       // 112:127
 void R(int x) { s=(s<sb)?(sb-1):s; r=rb; p=x; while (p) { u=stb[p++]; q[u](); } }
 void H(char* s) { FILE* fp = fopen("h.txt", "at"); if (fp) { fprintf(fp, "%s", s); fclose(fp); } }
 void L() {
