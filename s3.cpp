@@ -36,11 +36,9 @@ void init() {
 int funcN(int x) { 
     unsigned long hh = 5381;
     while (btw(stb[x], 'A', 'Z') || btw(stb[x], 'a', 'z') || (btw(stb[x], '0', '9'))) {
-    // while (btw(stb[x], 'A', 'Z') || btw(stb[x], 'a', 'z')) {
-            hh=((hh<<5)^hh)+(stb[x++]-'A');
+            hh=((hh<<4)^hh)+(stb[x++]-96);
     }
     fn=(hh & MAX_FN); fa=funcs[fn];
-    // printf("\n(fn:%d,fa:%d)",fn, fa);
     return x;
 }
 void fSystem() { system((char*)POP); }
@@ -102,7 +100,7 @@ void fRet() { p = st.i[r++]; if (rb < r) { r = rb; p = 0; } }
 void fLT() { NOS= (NOS<TOS) ? -1:0; s--; }
 void fEq() { NOS= (NOS==TOS)? -1:0; s--; }
 void fGT() { NOS= (NOS>TOS) ? -1:0; s--; }
-void fLookup() { p=funcN(p); PUSH=fa; }
+void fLookup() { p=funcN(p); PUSH=fa; PUSH=fn; }
 void fFetch() { TOS = st.i[TOS]; }
 void AZ() { p=funcN(p-1); if (fa) { st.i[--r]=p; p=fa; } }
 void fDrop() { --s; }
