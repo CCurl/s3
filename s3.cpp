@@ -93,7 +93,12 @@ void n09() {
 void fCreate() {
     p=funcN(p); if (fa) { printf("-redef:%ld at %ld-", fn, fa); }
     while (stb[p]==' ') { ++p; } funcs[fn]=p;
-    while (stb[p++]!=';') {}
+    while (stb[p++]!=';') {
+        if (stb[p]=='\n') {
+            if (fp == (long)stdin) { printf(": "); }
+            fgets(&stb[p], 128, (FILE*)fp);
+        }
+    }
     if (h<p) { h=p; } st.i[0]=h;
 }
 void fRet() { p = st.i[r++]; if (rb < r) { r = rb; p = 0; } }
