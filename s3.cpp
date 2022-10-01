@@ -37,7 +37,7 @@ int funcN(int x) {
     fn = fa = 0;
     while (btw(stb[x], '0', '9')) { fn = (fn*10) + stb[x++]-'0'; }
     if (btw(fn,1,MAX_FN)) { fa = funcs[fn]; }
-    else { printf("-fnRange:%d-", fn); }
+    else { printf("-fnRange:%ld-", fn); }
     return x;
 }
 void fSystem() { system((char*)POP); }
@@ -90,7 +90,7 @@ void n09() {
     if (stb[p] == 'e') { ++p; st.f[s] = (float)TOS; }
 }
 void fCreate() {
-    if (stb[p] == 'F') { ++p; }
+    if (stb[p] == 'C') { ++p; }
     p=funcN(p); if (fa) { printf("-redef:%ld at %ld-", fn, fa); }
     while (stb[p]==' ') { ++p; } funcs[fn]=p;
     while (stb[p++]!=';') {}
