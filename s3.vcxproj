@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="doc\reference.txt" />
+    <Text Include="h.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />
