@@ -2,6 +2,10 @@ xX 0(reset s3)
 :CR 13,10,;
 :Code 0@1[nc@#58=(n1-c@59=(13,10,),];
 :YN #("y")~("n");
+:Multiline 1 2 3
++
++
+.;
 :Regs "(Regs:Todo)";
 :HelloWorld "hello world!";
 :Locs s3 s4 i3 d4 r3 r4 + "locals: %d";
@@ -17,6 +21,7 @@ Ver
 CR Regs
 CR HelloWorld
 CR 1 YN 0 YN
+CR Multiline
 CR 111 222 Locs
 CR 50 Mil Bench
 CR ULTestD
