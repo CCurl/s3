@@ -91,7 +91,7 @@ void n09() {
     if (stb[p] == 'e') { ++p; st.f[s] = (float)TOS; }
 }
 void fCreate() {
-    p=funcN(p); if (fa) { printf("-redef:%ld at %ld-", fn, fa); }
+    p=funcN(p);
     while (stb[p]==' ') { ++p; } funcs[fn]=p;
     while (stb[p++]!=';') {
         if (stb[p]=='\n') {
@@ -99,6 +99,7 @@ void fCreate() {
             fgets(&stb[p], 128, (FILE*)fp);
         }
     }
+    if (fa) { printf("-redef:%ld at %ld-", fn, fa); }
     if (h<p) { h=p; } st.i[0]=h;
 }
 void fRet() { p = st.i[r++]; if (rb < r) { r = rb; p = 0; } }
