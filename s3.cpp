@@ -135,11 +135,6 @@ void fBit() {
     else { putc(32, stdout); --p; }
 }
 void fCOp() { u=stb[p++]; if (u=='@') { TOS=stb[TOS]; } else if (u=='!') { stb[TOS]=(char)NOS; s-=2; } }
-void fRegDec() { u = stb[p++]; 
-        if (btw(u, 'A', 'Z')) { st.i[u+32]--; } 
-        else if (btw(u, '0', '9')) { st.i[lb+u-'0']--; } 
-        else { --p; --TOS; }
-}
 void fFloat() { u = stb[p++]; // printf("-flt:%c-",u);
     if (u == '.') { printf("%g", st.f[s--]); }
     else if (u == '@') { st.f[s] = st.f[TOS]; }
@@ -170,9 +165,22 @@ void fHex() {
     else { return; } }
 }
 void fRegInc() { u = stb[p++]; 
-    if (btw(u, 'A', 'Z')) { st.i[u+32]++; } 
+    if (btw(u, 'A', 'Z')) { st.i[u]++; } 
     else if (btw(u, '0', '9')) { st.i[lb+u-'0']++; } 
     else { --p; ++TOS; }
+}
+void fRegDec() { u = stb[p++]; 
+        if (btw(u, 'A', 'Z')) { st.i[u]--; } 
+        else if (btw(u, '0', '9')) { st.i[lb+u-'0']--; } 
+        else { --p; --TOS; }
+}
+void fRegGet() { u = stb[p++]; PUSH=0;
+        if (btw(u, 'A', 'Z')) { TOS=st.i[u]; } 
+        else if (btw(u, '0', '9')) { TOS=st.i[lb+u-'0']; }
+}
+void fRegSet() { u = stb[p++]; t=POP;
+        if (btw(u, 'A', 'Z')) { st.i[u]=t; } 
+        else if (btw(u, '0', '9')) { st.i[lb+u-'0']=t; }
 }
 void fLoc() {
     u=stb[p++]; if (u=='+') { lb += (lb < 185) ? 10 : 0; }
@@ -185,14 +193,6 @@ void fKey() {
 void fMOp() { u=stb[p++]; if (u=='@') { TOS=*(char*)TOS; } } // else if (u=='!') { *(char*)TOS=(char)NOS; s-=2; } }
 void fIndex() { PUSH = R0; }
 void fDotS() { for (int i = sb; i <= s; i++) { printf("%c%ld", (i == sb) ? 0 : 32, st.i[i]); } }
-void fRegGet() { u = stb[p++]; PUSH=0;
-        if (btw(u, 'A', 'Z')) { TOS=st.i[u+32]; } 
-        else if (btw(u, '0', '9')) { TOS=st.i[lb+u-'0']; }
-}
-void fRegSet() { u = stb[p++]; t=POP;
-        if (btw(u, 'A', 'Z')) { st.i[u+32]=t; } 
-        else if (btw(u, '0', '9')) { st.i[lb+u-'0']=t; }
-}
 void fType() { y=(char*)&stb[POP]; puts(y); }
 void fExt() { u = stb[p++];
     if (u == '%') { NOS %= TOS; s--; } // MOD
