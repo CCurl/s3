@@ -15,7 +15,7 @@
 #define BSZ    (64*1024)
 #define ISZ      (BSZ/4)
 #define FSZ        10
-#define MAX_FN  0x3FF
+#define MAX_FN  0x7FF
 #define putC(ch) putc(ch, stdout)
 #define getC() fgetc(stdin)
 
@@ -36,7 +36,7 @@ void init() {
 int funcN(int x) { 
     unsigned long hh = 5381;
     while (btw(stb[x], 'A', 'Z') || btw(stb[x], 'a', 'z') || (btw(stb[x], '0', '9'))) {
-            hh=((hh<<4)^hh)+(stb[x++]-96);
+            hh=((hh<<4)^hh)+(stb[x++]);
     }
     fn=(hh & MAX_FN); fa=funcs[fn];
     return x;
