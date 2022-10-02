@@ -15,7 +15,7 @@
 #define BSZ    (64*1024)
 #define ISZ      (BSZ/4)
 #define FILESZ       10
-#define MAX_FN  0x3FF
+#define MAX_FN  0x7FF
 #define putC(ch) putc(ch, stdout)
 #define getC() fgetc(stdin)
 
