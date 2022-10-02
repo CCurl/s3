@@ -8,7 +8,10 @@ s3 ...
 ... is a full-featured, interactive, stack-based, interpreter/VM, implemented in under 250 lines of C code.
 ... has 100% human-readable (and understandable!) "machine code".
 ... has no compilation phase; it executes the source code directly.
-... supports up to 1023 (MAX_FN) function variable-length definitions.
+... supports up to CODE_SZ (default is 64K) bytes.
+... supports up to VARS_SZ (default is 64K) longs.
+... supports variable-length function names.
+... supports up to MAX_FN (default is 2048) functions.
 ... provides 26 registers, [rA..rZ].
 ... supports locals, 10 at a time, [r0..r9].
 ... supports file operations, open, read, write, close, load.
