@@ -5,7 +5,7 @@ The following statements can be made about s3.
 ```
 s3 ...
 
-... is a full-featured, interactive, stack-based, interpreter/VM, implemented in under 250 lines of C code.
+... is a full-featured, interactive, stack-based, interpreter/VM, implemented in about 250 lines of C code.
 ... has 100% human-readable (and understandable!) "machine code".
 ... has no compilation phase; it executes the source code directly.
 ... supports up to CODE_SZ (default is 64K) bytes.
@@ -129,23 +129,28 @@ d  (x--y)         y: x-1                           (Decrement)
 *** FLOATING POINT ***
 ff    (n--F)      n: integer, F: float
 fi    (F--n)      F: float, n: integer
+f.    (F--)       Output F
 f@    (a--F)      Fetch float F from address a
 f!    (F a--)     Store float F to address a
 f+    (a b--n)    n: a+b - addition
 f-    (a b--n)    n: a-b - subtraction
 f*    (a b--n)    n: a*b - multiplication
-f<    (a b--f)    f: (a < b) ? 1 : 0;
-f>    (a b--f)    f: (a > b) ? 1 : 0;
-f.    (F--)       Output F
+f/    (a b--n)    n: a/b - division
+f<    (a b--f)    f: (a < b) ? -1 : 0;
+f>    (a b--f)    f: (a > b) ? -1 : 0;
+fS    (a--n)      n: SQR(a)
+fT    (a--n)      n: TANH(a)
 
 
 *** MEMORY ***
 @     (a--n)      Fetch CELL n from CELL address a
 !     (n a--)     Store CELL n to CELL address a
-c@    (a--n)      Fetch BYTE n from BYTE address a
-c!    (n a--)     Store BYTE n to BYTE address a
-m@    (a--n)      Fetch BYTE n from ABSOLUTE address a
-m!    (n a--)     Store BYTE n to ABSOLUTE address a
+c@    (a--b)      Fetch BYTE b from CODE address a
+c!    (b a--)     Store BYTE b to CODE address a
+w@    (a--w)      Fetch WORD w from CODE address a
+w!    (w a--)     Store WORD w to CODE address a
+m@    (a--b)      Fetch BYTE b from ABSOLUTE address a
+m!    (b a--)     Store BYTE b to ABSOLUTE address a
 
 
 *** REGISTERS and LOCALS ***
@@ -163,15 +168,17 @@ iC    (--)        Increment register C
 dC    (--)        Decrement register C
 
 
-*** WORDS/FUNCTIONS ***
-        NOTE: Word names are variable-length alphabetic (A-z) and start with a Capital letter.
-:Abc  (--)        Define word Abc. Copy chars to (HERE++) until next ';'.
-Abc   (--)        Execute/call word Abc
-;     (--)        End of word definition.
-^     (--)        Exit word.
+*** WORDS ***
+        NOTES: Word names are variable-length alphanumeric and start with a Capital letter.
+               Word "_" is the NONAME word (can be used to create jump-tables).
+:Abc3 (--)        Define word Abc. Skip until next ';'.
+:_    (--A)       A: current HERE. Define an un-named word. Skip until next ';'.
+Abc3  (--)        Execute/call word Abc3.
+;     (--)        End of word definition. Exits word at run-time.
+^     (--)        Exit word immediately.
         NOTE: To exit a word while inside of a loop, use 'xU^'.
-              example: :LoopTest 100 0[n. n32=("-out" xU^)", "];
-?Abc  (--a)       a: address of Abc, 0 if not defined
+              example: :LoopTest 100 0[n.b n32=("-out" xU^)", "];
+?Abc3 (--A H)     A: address of Abc3 (0 if not defined), H: hash-code.
 
 
 *** INPUT/OUTPUT ***
@@ -226,7 +233,7 @@ fW    (c h--)     Write: h=handle, c=char
 
 
 *** OTHER ***
-xL    (a--)       Load from file a (eg - 1000#|tests|\xL).
+xL    (A--)       Load from file A (eg - 1000#|tests|\xL)
 xPI   (p--)       Arduino: Pin Input  (pinMode(p, INPUT))
 xPU   (p--)       Arduino: Pin Pullup (pinMode(p, INPUT_PULLUP))
 xPO   (p--)       Arduino: Pin Output (pinMode(p, OUTPUT)
@@ -234,7 +241,7 @@ xPRA  (p--n)      Arduino: Pin Read Analog  (n = analogRead(p))
 xPRD  (p--n)      Arduino: Pin Read Digital (n = digitalRead(p))
 xPWA  (n p--)     Arduino: Pin Write Analog  (analogWrite(p, n))
 xPWD  (n p--)     Arduino: Pin Write Digital (digitalWrite(p, n))
-xR    (--r)       r: a random number in the range [0..0xFFFFFFFF]
+xR    (--r)       r: a random 32-bit number
 xT    (--n)       Milliseconds (Arduino: millis(), Windows/Linux: clock())
 xN    (--n)       Microseconds (Arduino: micros(), Windows/Linux: clock())
 xW    (n--)       TODO: Wait (Arduino: delay(),  Windows: Sleep())

@@ -147,7 +147,7 @@
     <None Include="make" />
     <None Include="README.md" />
     <None Include="S3.ino" />
-    <None Include="tests" />
+    <None Include="src.s3" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="s3.cpp" />
