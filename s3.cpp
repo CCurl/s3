@@ -93,10 +93,13 @@ void n09() {
     if (stb[p] == 'e') { ++p; st.f[s] = (float)TOS; }
 }
 void fCreate() {
-    if (stb[p]=='_') { PUSH=(++p); u=999; }
-    else { p = funcN(p); }
-    while (stb[p]==' ') { ++p; }
-    if (u!=999) { funcs[fn]=p; }
+    if (stb[p] == '_') { PUSH=(++p); u = 999; }
+    else {
+        p = funcN(p);
+        if (fa) { printf("-redef:%ld to %ld,hash(%ld)-", fa, p, fn); }
+    }
+    while (stb[p] == ' ') { ++p; }
+    if (u != 999) { funcs[fn] = p; }
     while (stb[p]!=';') {
         if (stb[p]) { if (stb[p]<32) { stb[p]=32; } ++p; }
         else {
@@ -104,13 +107,12 @@ void fCreate() {
             fgets(&stb[p], 128, (FILE *)fp);
         }
     }
-    if (fa) { printf("-redef:%ld at %ld-", fn, fa); }
     ++p; if (h<p) { h=p; st.i[0]=h; }
 }
 void fRet() { p = st.i[r++]; if (rb < r) { r = rb; p = 0; } }
-void fLT() { NOS= (NOS<TOS) ? -1:0; s--; }
-void fEq() { NOS= (NOS==TOS)? -1:0; s--; }
-void fGT() { NOS= (NOS>TOS) ? -1:0; s--; }
+void fLT() { NOS = (NOS<TOS) ? -1:0; s--; }
+void fEq() { NOS = (NOS==TOS)? -1:0; s--; }
+void fGT() { NOS = (NOS>TOS) ? -1:0; s--; }
 void fLookup() { p=funcN(p); PUSH=fa; PUSH=fn; }
 void fFetch() { TOS = st.i[TOS]; }
 void AZ() { p=funcN(p-1); if (fa) { st.i[--r]=p; p=fa; } }

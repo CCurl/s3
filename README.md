@@ -191,7 +191,7 @@ Abc3  (--)        Execute/call word Abc3.
 ^     (--)        Exit word immediately.
         NOTE: To exit a word while inside of a loop, use 'xU^'.
               example: :LoopTest 100 0[n.b n32=("-out" xU^)", "];
-?Abc3 (--A H)     A: address of Abc3 (0 if not defined), H: hash-code.
+?Abc3 (--A H)     A: address of Abc3 (0 if not defined), H: hash for "Abc3".
 
 
 *** INPUT/OUTPUT ***
