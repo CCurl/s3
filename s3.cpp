@@ -247,7 +247,7 @@ void Loop() {
         fp = (0<fpSp) ? fpStk[--fpSp] : (long)stdin;
     }
     if (fp == (long)stdin) { printf("\ns3:("); fDotS(); printf(")>"); }
-    stb[p]=0; fgets(&stb[h], 128, (FILE*)fp);
+    stb[h]=0; fgets(&stb[h], 128, (FILE*)fp);
     if (fp==(long)stdin) { Hist(&stb[h]); }
     Run(h);
 }
