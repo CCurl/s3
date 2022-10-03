@@ -52,7 +52,20 @@ Many interpreted environments a large SWITCH statement with cases in a loop to e
     Forth equivalent: C @ IF ."Yes" ELSE ."No" THEN
     C equivalent:     if (C) { printf("Yes") } else { printf("No") }
 
- ; x = (a == b) ? c : d;
+; A simple benchmark for a 100 million FOR loop:
+    :Mil 1000 # * *;
+    :Bench 0(n--) t $ 0[] t $ -;
+    100 Mil Bench . "usec"
+
+; A simple benchmark for a 100 million WHILE loop:
+    :Mil 1000#**;
+    :Bench 0(n--) t${1-#}\t$-." usec";
+    100 Mil Bench ." usec" 0(note that spaces are optional)
+
+; Define a word to display the currently defined code:
+    :Code 0(--) 0@1[nc@#58=(n1-c@59=(13,10,),];
+
+; x = (a == b) ? c : d;
     s3 code:          rA rB=#(rC$)~(rD)sX;
     Forth equivalent: a @ b @ = IF c @ ELSE d @ THEN x !
     C equivalent:     x = (a == b) ? c : d;
@@ -78,20 +91,18 @@ Many interpreted environments a large SWITCH statement with cases in a loop to e
     C equivalent:        for (int i = F; i < T; i++)) { printf("%d ", i); }
 
 ; One way to copy N bytes from A to B (n f t--)
-    :CopyFTN 0(f t n--) l+ s3 s2 s1 r3 0[r1 c@ r2 c! i1 i2] l-;
+    :Copy 0(f t n--) l+ s3 s2 s1 r3 0[r1 c@ r2 c! i1 i2] l-;
+    rA rB rN Copy
 
-; A simple benchmark for a 100 million FOR loop:
-    :Mil 1000 # * *;
-    :Bench 0(n--) t $ 0[] t $ -;
-    100 Mil Bench . "usec"
-
-; A simple benchmark for a 100 million WHILE loop:
-    :Mil 1000#**;
-    :Bench 0(n--) t${1-#}\t$-." usec";
-    100 Mil Bench ." usec" 0(note that spaces are optional)
-
-; Define a word to display the currently defined code:
-    :Code 0(--) 0@1[nc@#58=(n1-c@59=(13,10,),];
+; Creating a jump-table using un-named words
+    :JumpTable 10000;
+    :JtSet  0(a b--) JumpTable+!;
+    :JtGet  0(a b--) JumpTable+@;
+    :JtExec 0(--n)   JtGet e;
+    :_"-this is A-"; 'A JtSet
+    :_"-this is B-"; 'B JtSet
+    'A JtExec
+    'B JtExec
 
 ; Exit S3:
     xQ

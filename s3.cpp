@@ -93,9 +93,10 @@ void n09() {
     if (stb[p] == 'e') { ++p; st.f[s] = (float)TOS; }
 }
 void fCreate() {
-    if (stb[p]=='_') { ++p; PUSH=p; }
-    else { p = funcN(p); if (fa) { printf("-redef:%ld at %ld-", fn, fa); } }
-    while (stb[p]==' ') { ++p; } funcs[fn]=p;
+    if (stb[p]=='_') { ++p; PUSH=p; u=999; }
+    else { p=funcN(p); if (fa) { printf("-redef:%ld at %ld-", fn, fa); } }
+    while (stb[p]==' ') { ++p; }
+    if (u!=999) { funcs[fn]=p; }
     while (stb[p++]!=';') {}
     if (h<p) { h=p; } st.i[0]=h;
 }
