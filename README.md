@@ -8,14 +8,16 @@ s3 ...
 ... is a full-featured, interactive, stack-based, interpreter/VM, implemented in about 250 lines of C code.
 ... has 100% human-readable (and understandable!) "machine code".
 ... has no compilation phase; it executes the source code directly.
+... provides 26 registers, [rA..rZ].
+... supports locals, 10 at a time, [r0..r9].
+... supports floating point math.
+... supports file operations, open, read, write, close, load.
 ... supports up to CODE_SZ (default is 64K) bytes.
 ... supports up to VARS_SZ (default is 64K) longs.
 ... supports variable-length function names.
-... supports up to MAX_FN (default is 2048) functions.
-... provides 26 registers, [rA..rZ].
-... supports locals, 10 at a time, [r0..r9].
-... supports file operations, open, read, write, close, load.
-... supports floating point math.
+... supports multi-line words.
+... supports anonymous words.
+... supports up to MAX_FN (default is 2048) words.
 ... runs under Windows
 ... runs under Linux
 ... TODO: runs on development boards via the Arduino IDE
@@ -94,7 +96,7 @@ Many interpreted environments a large SWITCH statement with cases in a loop to e
     :Copy 0(f t n--) l+ s3 s2 s1 r3 0[r1 c@ r2 c! i1 i2] l-;
     rA rB rN Copy
 
-; Creating a jump-table using un-named words
+; Creating a jump-table using anonymous words
     :JumpTable 10000;
     :JtSet  0(a b--) JumpTable+!;
     :JtGet  0(a b--) JumpTable+@;
@@ -183,7 +185,7 @@ dC    (--)        Decrement register C
         NOTES: Word names are variable-length alphanumeric and start with a Capital letter.
                Word "_" is the NONAME word (can be used to create jump-tables).
 :Abc3 (--)        Define word Abc. Skip until next ';'.
-:_    (--A)       A: current HERE. Define an un-named word. Skip until next ';'.
+:_    (--A)       Define an anonymous word. A: current HERE. Skip until next ';'.
 Abc3  (--)        Execute/call word Abc3.
 ;     (--)        End of word definition. Exits word at run-time.
 ^     (--)        Exit word immediately.

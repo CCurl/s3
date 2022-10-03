@@ -12,6 +12,16 @@ xX 0(reset s3)
 :Benches 0 [# Mil Bench CR ]\;
 :ULTestD "UnloopTest-DO: " 100 1[n .b n 23=("-out"xU^)] "ERROR!";
 :ULTestW "UnloopTest-WHILE: " 100{# 73=("-out"\xU^)# .b 1-#} "ERROR!";
+:MultiLine
+"Here"
+" is a multiline"
+" function";
+:JumpTable 10000;
+:JtSet  0(a b--) JumpTable+!;
+:JtGet  0(a b--) JumpTable+@;
+:JtExec 0(--n)   JtGet e;
+:_"-anonynous A-"; 'A JtSet
+:_"-anonynous B-"; 'B JtSet
 :Reload 1000#|tests|\xL;
 Ver
 123 sA 44567 sZ
@@ -22,5 +32,7 @@ CR 111 222 Locs
 CR 50 Mil Bench
 CR ULTestD "-back"
 CR ULTestW "-back"
-CR Code CR
+CR MultiLine
+CR 'A JtExec 'B JtExec
+CR CR Code CR
 0(xQ)

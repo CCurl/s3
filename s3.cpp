@@ -42,7 +42,7 @@ int funcN(int x) {
     fn=(hh & MAX_FN); fa=funcs[fn];
     return x;
 }
-void X() { if (u && (u != 10) && (u != 13)) printf("-IR %ld (%c)?", u, (char)u); p = 0; }
+void X() { if (u) { printf("-IR %ld (%c)?", u, (char)u); } p = 0; }
 void N() {}
 void fSystem() { system((char*)POP); }
 void fOpen() { t=POP; y=&stb[TOS]; TOS=(long)fopen(y, (t) ? "wb" : "rb"); }
@@ -93,12 +93,19 @@ void n09() {
     if (stb[p] == 'e') { ++p; st.f[s] = (float)TOS; }
 }
 void fCreate() {
-    if (stb[p]=='_') { ++p; PUSH=p; u=999; }
-    else { p=funcN(p); if (fa) { printf("-redef:%ld at %ld-", fn, fa); } }
+    if (stb[p]=='_') { PUSH=(++p); u=999; }
+    else { p = funcN(p); }
     while (stb[p]==' ') { ++p; }
     if (u!=999) { funcs[fn]=p; }
-    while (stb[p++]!=';') {}
-    if (h<p) { h=p; } st.i[0]=h;
+    while (stb[p]!=';') {
+        if (stb[p]) { if (stb[p]<32) { stb[p]=32; } ++p; }
+        else {
+            if (fp == (long)stdin) { printf(": "); }
+            fgets(&stb[p], 128, (FILE *)fp);
+        }
+    }
+    if (fa) { printf("-redef:%ld at %ld-", fn, fa); }
+    ++p; if (h<p) { h=p; st.i[0]=h; }
 }
 void fRet() { p = st.i[r++]; if (rb < r) { r = rb; p = 0; } }
 void fLT() { NOS= (NOS<TOS) ? -1:0; s--; }
@@ -221,7 +228,7 @@ void fWhile() { if (POP) { p=R0; } else { r+=3; } }
 void fLNot() { TOS=(TOS)?0:-1; }
 
 void (*q[128])() = { 
-    X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,                     //   0:31
+    X,X,X,X,X,X,X,X,X,X,N,X,X,N,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,                     //   0:31
     N,fStore,fDotQ,fDup,fSwap,fOver,fSlMod,fAscii,fIf,N,fMult,fAdd,fEmit,fSub,fDot,fDiv, //  32:47
     n09,n09,n09,n09,n09,n09,n09,n09,n09,n09,fCreate,fRet,fLT,fEq,fGT,fLookup,            //  48:63
     fFetch,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,                                 //  64:79
@@ -229,18 +236,18 @@ void (*q[128])() = {
     fSys,fAbs,fBit,fCOp,fRegDec,fExec,fFloat,X,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,   //  96:111
     X,fDotS,fRegGet,fRegSet,fType,X,X,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };       // 112:127
 
-void R(int x) { s=(s<sb)?(sb-1):s; r=rb; p=x; while (p) { u=stb[p++]; q[u](); } }
-void H(char* s) { FILE* fp = fopen("h.txt", "at"); if (fp) { fprintf(fp, "%s", s); fclose(fp); } }
-void L() {
+void Run(int x) { s=(s<sb)?(sb-1):s; r=rb; p=x; while (p) { u=stb[p++]; q[u](); } }
+void Hist(char* s) { FILE* fp = fopen("h.txt", "at"); if (fp) { fprintf(fp, "%s", s); fclose(fp); } }
+void Loop() {
     if (feof((FILE*)fp)) {
         if (fp==(long)stdin) { exit(0); }
         PUSH=fp; fClose();
         fp = (0<fpSp) ? fpStk[--fpSp] : (long)stdin;
     }
     if (fp == (long)stdin) { printf("\ns3:("); fDotS(); printf(")>"); }
-    fgets(&stb[h], 128, (FILE*)fp);
-    if (fp == (long)stdin) { H(&stb[h]); }
-    R(h);
+    stb[p]=0; fgets(&stb[h], 128, (FILE*)fp);
+    if (fp==(long)stdin) { Hist(&stb[h]); }
+    Run(h);
 }
 int main(int argc, char* argv[]) {
     init(1);
@@ -254,6 +261,6 @@ int main(int argc, char* argv[]) {
     if ((argc>1) && (argv[1][0]!='-')) { fp = (long)fopen(argv[1], "rb"); }
     if (!fp) { fp = (long)fopen("src.s3", "rb"); }
     if (!fp) { fp=(long)stdin; }
-    while (1) { L(); }
+    while (1) { Loop(); }
     return 0;
 }
