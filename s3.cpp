@@ -117,9 +117,14 @@ void fEq() { NOS = (NOS==TOS)? -1:0; s--; }
 void fGT() { NOS = (NOS>TOS) ? -1:0; s--; }
 void fLookup() { p=funcN(p); PUSH=fa; PUSH=fn; }
 void fFetch() { TOS = st.i[TOS]; }
-void fGoto() { if (TOS) { p=TOS; } s--; }
-void fExec() { if (TOS && (stb[p]!=';')) { st.i[--r]=p; } fGoto(); }
-void AZ() { p=funcN(p-1); PUSH=fa; fExec(); }
+void doExec(long addr) {
+    if (!addr) { printf("-noimpl-"); return; }
+    if((stb[p]!=';') || (stb[p]!='^')) { st.i[--r]=p; }
+    p=addr;
+}
+void fGoto() { p=POP; }
+void fExec() { doExec(POP); }
+void AZ() { p=funcN(p-1); doExec(fa); }
 void fDo() { r -= 3; st.i[r+2]=p; st.i[r]=POP; st.i[r+1]=POP; }
 void fLoopS(int x) {
     if ((x==1) && (R0<R1)) { p=st.i[r+2]; return; }
