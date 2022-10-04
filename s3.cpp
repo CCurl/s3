@@ -117,7 +117,9 @@ void fEq() { NOS = (NOS==TOS)? -1:0; s--; }
 void fGT() { NOS = (NOS>TOS) ? -1:0; s--; }
 void fLookup() { p=funcN(p); PUSH=fa; PUSH=fn; }
 void fFetch() { TOS = st.i[TOS]; }
-void AZ() { p=funcN(p-1); if (fa) { st.i[--r]=p; p=fa; } }
+void fGoto() { if (TOS) { p=TOS; } s--; }
+void fExec() { if (TOS && (stb[p]!=';')) { st.i[--r]=p; } fGoto(); }
+void AZ() { p=funcN(p-1); PUSH=fa; fExec(); }
 void fDo() { r -= 3; st.i[r+2]=p; st.i[r]=POP; st.i[r+1]=POP; }
 void fLoopS(int x) {
     if ((x==1) && (R0<R1)) { p=st.i[r+2]; return; }
@@ -149,8 +151,6 @@ void fWord() {
     if (u=='@') { TOS = (stb[TOS+1]<<8) | stb[TOS]; }
     if (u=='!') { stb[TOS]=(BYTE)NOS; stb[TOS+1]=(BYTE)(NOS>>8); s-=2; }
 }
-void fGoto() { if (TOS) { p=TOS; } s--; }
-void fExec() { if (stb[p]!=';') { st.i[--r]=p; } fGoto(); }
 void fFloat() { u = stb[p++]; // printf("-flt:%c-",u);
     if (u == '.') { printf("%g", st.f[s--]); }
     else if (u == '@') { st.f[s] = st.f[TOS]; }
