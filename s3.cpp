@@ -18,9 +18,11 @@
 #define MAX_FN      0x7FF
 #define putC(ch) putc(ch, stdout)
 #define getC()   fgetc(stdin)
+#define BYTE     unsigned char
 
 union fib { float f[VARS_SZ]; long i[VARS_SZ]; }; static union fib st;
-static char *y, stb[CODE_SZ]; 
+static char* y;
+BYTE stb[CODE_SZ];
 static long c, cb=1, h, sb=4, rb=64, rg=68, lb=125, r, s, t, u, fpSp;
 static long fn, fa, funcs[MAX_FN+1], p;
 static long sd, fp;
@@ -45,7 +47,7 @@ int funcN(int x) {
 void X() { if (u) { printf("-IR %ld (%c)?", u, (char)u); } p = 0; }
 void N() {}
 void fSystem() { system((char*)POP); }
-void fOpen() { t=POP; y=&stb[TOS]; TOS=(long)fopen(y, (t) ? "wb" : "rb"); }
+void fOpen() { t=POP; y=(char*)&stb[TOS]; TOS=(long)fopen((char*)y, (t) ? "wb" : "rb"); }
 void fClose() { if (TOS) { fclose((FILE*)TOS); } s--; }
 void fLoad() { 
     PUSH=0; fOpen(); t=POP;
@@ -104,7 +106,7 @@ void fCreate() {
         if (stb[p]) { if (stb[p]<32) { stb[p]=32; } ++p; }
         else {
             if (fp == (long)stdin) { printf(": "); }
-            fgets(&stb[p], 128, (FILE *)fp);
+            fgets((char*)&stb[p], 128, (FILE *)fp);
         }
     }
     ++p; if (h<p) { h=p; st.i[0]=h; }
@@ -139,15 +141,16 @@ void fBit() {
 }
 void fCOp() {
     u=stb[p++];
-    if (u=='@') { TOS=stb[TOS]; }
-    if (u=='!') { stb[TOS]=(char)NOS; s-=2; }
+    if (u=='@') { TOS=(BYTE)stb[TOS]; }
+    if (u=='!') { stb[TOS]=(BYTE)NOS; s-=2; }
 }
 void fWord() {
     u=stb[p++];
-    if (u=='@') { TOS = (stb[TOS+1]<<8) + stb[TOS]; }
-    if (u=='!') { stb[TOS]=(char)NOS; stb[TOS+1]=(char)(NOS>>8); s-=2; }
+    if (u=='@') { TOS = (stb[TOS+1]<<8) | stb[TOS]; }
+    if (u=='!') { stb[TOS]=(BYTE)NOS; stb[TOS+1]=(BYTE)(NOS>>8); s-=2; }
 }
-void fExec() { st.i[--r] = p; p = POP; }
+void fGoto() { if (TOS) { p=TOS; } s--; }
+void fExec() { if (stb[p]!=';') { st.i[--r]=p; } fGoto(); }
 void fFloat() { u = stb[p++]; // printf("-flt:%c-",u);
     if (u == '.') { printf("%g", st.f[s--]); }
     else if (u == '@') { st.f[s] = st.f[TOS]; }
@@ -235,8 +238,8 @@ void (*q[128])() = {
     n09,n09,n09,n09,n09,n09,n09,n09,n09,n09,fCreate,fRet,fLT,fEq,fGT,fLookup,            //  48:63
     fFetch,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,                                 //  64:79
     AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,fDo,fDrop,fLoop,fLeave,fNeg,                        //  80:95
-    fSys,fAbs,fBit,fCOp,fRegDec,fExec,fFloat,X,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,   //  96:111
-    X,fDotS,fRegGet,fRegSet,fType,X,X,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };       // 112:127
+    fSys,fAbs,fBit,fCOp,fRegDec,fExec,fFloat,fGoto,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,   //  96:111
+    X,fDotS,fRegGet,fRegSet,fType,X,X,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };   // 112:127
 
 void Run(int x) { s=(s<sb)?(sb-1):s; r=rb; p=x; while (p) { u=stb[p++]; q[u](); } }
 void Hist(char* s) { FILE* fp = fopen("h.txt", "at"); if (fp) { fprintf(fp, "%s", s); fclose(fp); } }
@@ -247,8 +250,8 @@ void Loop() {
         fp = (0<fpSp) ? fpStk[--fpSp] : (long)stdin;
     }
     if (fp == (long)stdin) { printf("\ns3:("); fDotS(); printf(")>"); }
-    stb[h]=0; fgets(&stb[h], 128, (FILE*)fp);
-    if (fp==(long)stdin) { Hist(&stb[h]); }
+    stb[h]=0; fgets((char*)&stb[h], 128, (FILE*)fp);
+    if (fp==(long)stdin) { Hist((char*)&stb[h]); }
     Run(h);
 }
 int main(int argc, char* argv[]) {
