@@ -1,7 +1,7 @@
 // s3.cpp - inspired by STABLE from Sandor Schneider
 #include "s3.h"
 
-union fib { float f[VARS_SZ]; long i[VARS_SZ]; }; static union fib st;
+ST_T st;
 static char* y;
 BYTE stb[CODE_SZ];
 long cb=1, h, sb = 4, rb = 64, rg = 68, lb = 125, r, s, t, u, fpSp;

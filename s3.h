@@ -12,32 +12,36 @@
 
 typedef unsigned char BYTE;
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <time.h>
+
 #ifdef _WIN32
 	#define __PC__
-	#define _CRT_SECURE_NO_WARNINGS
 	#define CODE_SZ        (64*1024)
 	#define VARS_SZ        (64*1024)
 	#define FILE_SZ             10
 	#define MAX_FN          0x07FF
-	#define putC(ch)        putc(ch, stdout)
-	#define getC()          fgetc(stdin)
-	#define printString(s)  printf(s)
-	#define doUser(u,p)     p
+	int  getC() { return fgetc(stdin); }
+	void putC(int c) { putc(c, stdout); }
+	void printString(const char *s) { printf(s); }
+	long doUser(long ir, long pc) { return pc; }
 #elif _LINUX
 	#define __PC__
 	#define CODE_SZ        (64*1024)
 	#define VARS_SZ        (64*1024)
 	#define FILE_SZ             10
 	#define MAX_FN          0x07FF
-	#define putC(ch)        putc(ch, stdout)
-	#define getC()          fgetc(stdin)
-	#define printString(s)  printf(s)
-	#define doUser(u,p)     p
+	int getC() { return fgetc(stdin); }
+	void putC(int c) { putc(c, stdout); }
+	void printString(const char *s) { printf(s); }
+	long doUser(long ir, long pc) { return pc; }
 #else
 	// It's a board ...
-	#define _TEENSY4_
+	// #define _TEENSY4_
 	// #define _XIAO_
-	// #define _PICO_
+	#define _PICO_
 	// #define _FILES_
 	// #define __GAMEPAD__
 	#define CODE_SZ         (64*1024)
@@ -46,19 +50,21 @@ typedef unsigned char BYTE;
 	#define MAX_FN          0x07FF
 	#define putC(c)         printChar(c)
 	#define printString(s)  printSerial(s)
+	extern void init(int);
+	extern void Run(int);
+	extern int printStringF(const char *fmt, ...);
+	extern int charAvailable();
+	extern void fDotS();
+	extern int getC();
+	extern void putC(int);
+	extern void printString(const char *);
+	extern long doUser(long, long);
+
+	extern BYTE stb[];
+	extern long s, h;
+	extern ST_T st;
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <time.h>
-
-extern int printStringF(const char *fmt, ...);
-extern int charAvailable();
-extern int getChar();
-extern void fDotS();
-
-extern BYTE stb[];
-extern long h;
+typedef union { float f[VARS_SZ]; long i[VARS_SZ]; } ST_T;
 
 #endif // __s3_h__
