@@ -266,4 +266,4 @@ int main(int argc, char* argv[]) {
     while (1) { Loop(); }
     return 0;
 }
-#endif __PC__
+#endif // __PC__

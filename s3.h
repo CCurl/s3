@@ -61,4 +61,4 @@ extern void fDotS();
 extern BYTE stb[];
 extern long h;
 
-#endif __s3_h__
+#endif // __s3_h__
