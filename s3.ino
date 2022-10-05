@@ -2,27 +2,23 @@
 
 #if __SERIAL__
     int charAvailable() { return mySerial.available(); }
-    int getChar() { 
+    void printString(const char* str) { mySerial.print(str); }
+    int getC() { 
         while (!charAvailable()) {}
         return mySerial.read();
     }
-    void printSerial(const char* str) { mySerial.print(str); }
+    void putC(int ch) { 
+        char b[2] = { (char)ch, 0 };
+        printString(b);
+    }
 #else
     int charAvailable() { return 0; }
-    int getChar() { return 0; }
-    void printSerial(const char* str) { }
+    int getC() { return 0; }
+    void putC(int c) { }
+    void printString(const char* str) { }
 #endif
 
 int isOTA = 0;
-
-void printString(const char* str) { 
-    printSerial(str);
-}
-
-void printChar(const char ch) { 
-    char b[2] = { ch, 0 };
-    printString(b);
-}
 
 #ifdef __GAMEPAD__
 #include <HID-Project.h>
@@ -37,45 +33,43 @@ void gp_PressRelease(int btn) {
     Gamepad.write();        
 }
 
-addr doGamePad(byte ir, addr pc) {
-    ir = *(pc++);
+long doGamePad(long ir, long pc) {
+    ir = stb[pc++];
     switch (ir) {
-    case 'X': Gamepad.xAxis(pop());          break;
-    case 'Y': Gamepad.yAxis(pop());          break;
-    case 'P': gp_PressRelease((int)pop());   break;
-    case 'R': Gamepad.release(pop());        break;
-    case 'A': Gamepad.dPad1(pop());          break;
-    case 'B': Gamepad.dPad2(pop());          break;
-    case 'L': Gamepad.releaseAll();          break;
-    case 'W': Gamepad.write();               break;
+    case 'X': Gamepad.xAxis(POP);          break;
+    case 'Y': Gamepad.yAxis(POP);          break;
+    case 'P': gp_PressRelease((int)POP);   break;
+    case 'R': Gamepad.release(POP);        break;
+    case 'A': Gamepad.dPad1(POP);          break;
+    case 'B': Gamepad.dPad2(POP);          break;
+    case 'L': Gamepad.releaseAll();        break;
+    case 'W': Gamepad.write();             break;
     default:
-        isError = 1;
         printString("-notGamepad-");
     }
     return pc;
 }
 #else
-addr doGamePad(addr pc) { printString("-noGamepad-"); return pc; }
+long doGamePad(long ir, long pc) { printString("-noGamepad-"); return pc; }
 void gamePadBegin() { }
 #endif
 
-addr doPin(addr pc) {
-    CELL pin = pop();
-    byte ir = *(pc++);
+long doPin(long pc) {
+    long pin = POP;
+    byte ir = stb[pc++];
     switch (ir) {
     case 'I': pinMode(pin, INPUT);          break;
     case 'O': pinMode(pin, OUTPUT);         break;
     case 'U': pinMode(pin, INPUT_PULLUP);   break;
-    case 'R': ir = *(pc++);
-        if (ir == 'A') { push(analogRead(pin));  }
-        if (ir == 'D') { push(digitalRead(pin)); }
+    case 'R': ir = stb[pc++];
+        if (ir == 'A') { PUSH(analogRead(pin));  }
+        if (ir == 'D') { PUSH(digitalRead(pin)); }
         break;
-    case 'W': ir = *(pc++);
-        if (ir == 'A') { analogWrite(pin,  (int)pop()); }
-        if (ir == 'D') { digitalWrite(pin, (int)pop()); }
+    case 'W': ir = stb[pc++];
+        if (ir == 'A') { analogWrite(pin,  (int)POP); }
+        if (ir == 'D') { digitalWrite(pin, (int)POP); }
         break;
     default:
-        isError = 1;
         printString("-notPin-");
     }
     return pc;
@@ -84,9 +78,9 @@ addr doPin(addr pc) {
 long doUser(long ir, long pc) {
     switch (ir) {
     case 'G': pc = doGamePad(ir, pc);       break;
-    case 'N': push(micros());               break;
+    case 'N': PUSH(micros());               break;
     case 'P': pc = doPin(pc);               break;
-    case 'T': push(millis());               break;
+    case 'T': PUSH(millis());               break;
     case 'W': delay(POP);                   break;
     case 'L': PUSH(LED_BUILTIN);            break;
     default:
@@ -98,7 +92,7 @@ long doUser(long ir, long pc) {
 void loadCode(const char* src) {
     long here = h;
     while (*src) {
-        stb[here++) = *(src++);
+        stb[here++] = *(src++);
     }
     stb[here] = 0;
     Run(h);
@@ -156,8 +150,8 @@ void handleInput(char c) {
         return;
     }
 
-    if (isBackSpace(c) && (h < here1)) {
-        here1--;
+    if (isBackSpace(c) && (h < here)) {
+        here--;
         if (!isOTA) {
           char b[] = {8, 32, 8, 0};
           printString(b);
@@ -165,7 +159,7 @@ void handleInput(char c) {
         return;
     }
     if (c == 9) { c = 32; }
-    if (BetweenI(c, 32, 126)) {
+    if (btw(c, 32, 126)) {
         stb[here++] = c;
         if (!isOTA) { printChar(c); }
     }
@@ -179,12 +173,12 @@ void setup() {
     // while (mySerial.available()) { char c = mySerial.read(); }
     ok();
 #endif
-    vmInit();
+    init(1);
     gamePadBegin();
 }
 
 void do_autoRun() {
-    addr fa = 0;
+    long fa = st.i[1];
     if (fa) { Run(fa); }
 }
 
@@ -210,7 +204,7 @@ void loop() {
 
     while (charAvailable()) { 
         isOTA = 0;
-        handleInput(getChar()); 
+        handleInput(getC()); 
     }
     do_autoRun();
 }
