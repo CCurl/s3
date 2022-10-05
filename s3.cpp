@@ -7,7 +7,7 @@
 #define btw(a,b,c) ((b<=a) && (a<=c))
 #define TOS      st.i[s]
 #define NOS      st.i[s-1]
-#define PUSH     st.i[++s]
+#define PUSH(x)  st.i[++s]=(long)(x)
 #define POP      st.i[s--]
 #define R0       st.i[r]
 #define R1       st.i[r+1]
@@ -50,7 +50,7 @@ void fSystem() { system((char*)POP); }
 void fOpen() { t=POP; y=(char*)&stb[TOS]; TOS=(long)fopen((char*)y, (t) ? "wb" : "rb"); }
 void fClose() { if (TOS) { fclose((FILE*)TOS); } s--; }
 void fLoad() { 
-    PUSH=0; fOpen(); t=POP;
+    PUSH(0); fOpen(); t=POP;
     if (t) { if ((FILE*)fp != stdin) { fpStk[++fpSp] = fp; } fp = t; }
     else { printf("-loadFail-"); }
 }
@@ -76,12 +76,12 @@ void dotQ(int delim) {
 }
 void fStore() { st.i[TOS]=NOS; s-=2; }
 void fDotQ() { dotQ('"'); }
-void fDup() { t=TOS; PUSH=t; }
+void fDup() { t=TOS; PUSH(t); }
 void fSwap() { t=TOS; TOS=NOS; NOS=t; }
-void fOver() { t=NOS; PUSH=t; }
+void fOver() { t=NOS; PUSH(t); }
 void fDrop() { --s; }
 void fSlMod() { u=NOS; t=TOS; NOS=u/t; TOS=u%t; }
-void fAscii() { PUSH = stb[p++]; }
+void fAscii() { PUSH(stb[p++]); }
 void fDot() { printf("%ld", POP); }
 void fEmit() { putC(POP); }
 void fIf() { if (POP == 0) { while (stb[p++] != ')'); } }
@@ -90,12 +90,12 @@ void fSub() { NOS -= TOS; s--; }
 void fMult() { NOS *= TOS; s--; }
 void fDiv() { NOS /= TOS; s--; }
 void n09() {
-    PUSH = (u - '0'); 
+    PUSH(u - '0');
     while (btw(stb[p], '0', '9')) { TOS = (TOS * 10) + stb[p++] - '0'; }
     if (stb[p] == 'e') { ++p; st.f[s] = (float)TOS; }
 }
 void fCreate() {
-    if (stb[p] == '_') { PUSH=(++p); u = 999; }
+    if (stb[p] == '_') { PUSH(++p); u = 999; }
     else {
         p = funcN(p);
         if (fa) { printf("-redef:%ld to %ld,hash(%ld)-", fa, p, fn); }
@@ -115,7 +115,7 @@ void fRet() { p = st.i[r++]; if (rb < r) { r = rb; p = 0; } }
 void fLT() { NOS = (NOS<TOS) ? -1:0; s--; }
 void fEq() { NOS = (NOS==TOS)? -1:0; s--; }
 void fGT() { NOS = (NOS>TOS) ? -1:0; s--; }
-void fLookup() { p=funcN(p); PUSH=fa; PUSH=fn; }
+void fLookup() { p=funcN(p); PUSH(fa); PUSH(fn); }
 void fFetch() { TOS = st.i[TOS]; }
 void doExec(long addr) {
     if (!addr) { printf("-noimpl-"); return; }
@@ -136,7 +136,7 @@ void fLeave() { p=st.i[r++]; }
 void fNeg() { TOS = -TOS; }
 void fSys() { c = CODE_SZ-100; t=c;
     while ((31 < stb[p]) && (stb[p] != '`')) { stb[t++] = stb[p++]; }
-    stb[t]=0; ++p; PUSH=(long)&stb[c]; fSystem();
+    stb[t]=0; ++p; PUSH(&stb[c]); fSystem();
 }
 void fAbs() { TOS=(TOS<0)?-TOS:TOS; }
 void fBit() {
@@ -173,13 +173,13 @@ void fFloat() { u = stb[p++]; // printf("-flt:%c-",u);
     else if (u == 'O') { fOpen(); }
     else if (u == 'C') { fClose(); }
     else if (u == 'R') { 
-        t = TOS; TOS=0; PUSH=0;
+        t = TOS; TOS=0; PUSH(0);
         if (t) { TOS=fread((void*)&NOS, 1, 1, (FILE*)t);  }
     }
     else if (u == 'W') { if (TOS) { fwrite((void*)&NOS, 1, 1, (FILE*)TOS); } s -= 2; }
 }
-void fHex() {
-    PUSH=0; while (1) {
+void fHex() { PUSH(0); 
+    while (1) {
         if (btw(stb[p],'0','9')) { TOS=(TOS*16)+stb[p++]-'0'; }
         else if (btw(stb[p],'A','F')) { TOS=(TOS*16)+stb[p++]-'A'+10; }
         else if (btw(stb[p],'a','f')) { TOS=(TOS*16)+stb[p++]-'a'+10; }
@@ -201,10 +201,10 @@ void fLoc() {
     else if (u=='-') { lb -= (125 < lb) ? 10 : 0; }
 }
 void fKey() {
-    u=stb[p++]; if (u=='?') { PUSH = 0; /*TODO!*/ }
-    else if (u=='@') { PUSH = getC(); }
+    u=stb[p++]; if (u=='?') { PUSH(0); /*TODO!*/ }
+    else if (u=='@') { PUSH(getC()); }
 }
-void fRegGet() { u = stb[p++]; PUSH=0;
+void fRegGet() { u = stb[p++]; PUSH(0);
         if (btw(u, 'A', 'Z')) { TOS=st.i[u]; } 
         else if (btw(u, '0', '9')) { TOS=st.i[lb+u-'0']; }
 }
@@ -213,7 +213,7 @@ void fRegSet() { u = stb[p++]; t=POP;
         else if (btw(u, '0', '9')) { st.i[lb+u-'0']=t; }
 }
 void fMOp() { u=stb[p++]; if (u=='@') { TOS=*(char*)TOS; } } // else if (u=='!') { *(char*)TOS=(char)NOS; s-=2; } }
-void fIndex() { PUSH = R0; }
+void fIndex() { PUSH(R0); }
 void fDotS() { for (int i = sb; i <= s; i++) { printf("%c%ld", (i == sb) ? 0 : 32, st.i[i]); } }
 void fType() { y=(char*)&stb[POP]; puts(y); }
 void fExt() { u = stb[p++];
@@ -221,11 +221,11 @@ void fExt() { u = stb[p++];
     else if (u == ']') { u=(R0<R1)?1:0; R0+=POP; fLoopS(u); } // +LOOP
     else if (u == 'R') { if (!sd) { sd=(long)(cb+y)+clock(); } // RAND
         sd=(sd<<13)^sd; sd=(sd>>17)^sd; sd = (sd<<5)^sd;
-        PUSH=sd; } 
+        PUSH(sd); } 
     else if (u == 'L') { fLoad(); } // ABS
     else if (u == 'Y') { TOS=(long)&stb[TOS]; fSystem(); } // system
-    else if (u == 'T') { PUSH = clock(); } // TIMER/MILLIS
-    else if (u == 'N') { PUSH = clock()*1000; } // TIMER/MICRO
+    else if (u == 'T') { PUSH(clock()); } // TIMER/MILLIS
+    else if (u == 'N') { PUSH(clock()*1000); } // TIMER/MICRO
     else if (u == 'U') { r+=3; } // UNLOOP
     else if (u == 'W') { printf("-wait:%ld-", POP); } // WAIT
     else if (u == 'X') { init(0); p=0; } // Reset
@@ -238,20 +238,20 @@ void fWhile() { if (POP) { p=R0; } else { r+=3; } }
 void fLNot() { TOS=(TOS)?0:-1; }
 
 void (*q[128])() = { 
-    X,X,X,X,X,X,X,X,X,X,N,X,X,N,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,                     //   0:31
-    N,fStore,fDotQ,fDup,fSwap,fOver,fSlMod,fAscii,fIf,N,fMult,fAdd,fEmit,fSub,fDot,fDiv, //  32:47
-    n09,n09,n09,n09,n09,n09,n09,n09,n09,n09,fCreate,fRet,fLT,fEq,fGT,fLookup,            //  48:63
-    fFetch,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,                                 //  64:79
-    AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,fDo,fDrop,fLoop,fLeave,fNeg,                        //  80:95
-    fSys,fAbs,fBit,fCOp,fRegDec,fExec,fFloat,fGoto,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,   //  96:111
-    X,fDotS,fRegGet,fRegSet,fType,X,X,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };   // 112:127
+    X,X,X,X,X,X,X,X,X,X,N,X,X,N,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,                        //   0:31
+    N,fStore,fDotQ,fDup,fSwap,fOver,fSlMod,fAscii,fIf,N,fMult,fAdd,fEmit,fSub,fDot,fDiv,    //  32:47
+    n09,n09,n09,n09,n09,n09,n09,n09,n09,n09,fCreate,fRet,fLT,fEq,fGT,fLookup,               //  48:63
+    fFetch,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,                                    //  64:79
+    AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,fDo,fDrop,fLoop,fLeave,fNeg,                           //  80:95
+    fSys,fAbs,fBit,fCOp,fRegDec,fExec,fFloat,fGoto,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,  //  96:111
+    X,fDotS,fRegGet,fRegSet,fType,X,X,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };      // 112:127
 
 void Run(int x) { s=(s<sb)?(sb-1):s; r=rb; p=x; while (p) { u=stb[p++]; q[u](); } }
 void Hist(char* s) { FILE* fp = fopen("h.txt", "at"); if (fp) { fprintf(fp, "%s", s); fclose(fp); } }
 void Loop() {
     if (feof((FILE*)fp)) {
         if (fp==(long)stdin) { exit(0); }
-        PUSH=fp; fClose();
+        PUSH(fp); fClose();
         fp = (0<fpSp) ? fpStk[--fpSp] : (long)stdin;
     }
     if (fp == (long)stdin) { printf("\ns3:("); fDotS(); printf(")>"); }
