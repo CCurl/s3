@@ -140,7 +140,7 @@ int isBackSpace(char c) {
 
 void handleInput(char c) {
     static long here = 0;
-    if (here == NULL) { here = h; }
+    if (here == 0) { here = h; }
     if (c == 13) {
         printString(" ");
         stb[here] = 0;
