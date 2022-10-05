@@ -24,9 +24,6 @@ void printChar(const char ch) {
     printString(b);
 }
 
-CELL getSeed() { return millis(); }
-
-#define __GAMEPAD__
 #ifdef __GAMEPAD__
 #include <HID-Project.h>
 #include <HID-Settings.h>
@@ -84,40 +81,35 @@ addr doPin(addr pc) {
     return pc;
 }
 
-addr doCustom(byte ir, addr pc) {
+long doUser(long ir, long pc) {
     switch (ir) {
     case 'G': pc = doGamePad(ir, pc);       break;
     case 'N': push(micros());               break;
     case 'P': pc = doPin(pc);               break;
     case 'T': push(millis());               break;
-    case 'W': delay(pop());                 break;
-    case 'L': push(LED_BUILTIN);            break;
+    case 'W': delay(POP);                   break;
+    case 'L': PUSH(LED_BUILTIN);            break;
     default:
-        isError = 1;
         printString("-notExt-");
     }
     return pc;
 }
 
 void loadCode(const char* src) {
-    addr here = HERE;
-    addr here1 = HERE;
+    long here = h;
     while (*src) {
-        *(here1++) = *(src++);
+        stb[here++) = *(src++);
     }
-    *here1 = 0;
-    run(here);
+    stb[here] = 0;
+    Run(h);
 }
-
-void input_push(FILE *fp) { }
-FILE *input_pop() { return NULL; }
 
 // ********************************************
 // * HERE is where you load your default code *
 // ********************************************
 
 #define SOURCE_STARTUP \
-    X(1000, ":C \"%n\"xIAU xIH1-[rIc@#,';=(rI1+c@':=(\"%n\"))];") \
+    X(1000, ":Code 0@1[nc@#58=(n1-c@59=(13,10,),];") \
 
 //#if __BOARD__ == ESP8266
 #define X(num, val) const char str ## num[] = val;
@@ -139,10 +131,10 @@ void loadBaseSystem() {
     }
 }
 
-void ok() {
-    printString("\r\ns3:"); 
-    dumpStack(); 
-    printString(">");
+void s3() {
+    printString("\ns3:(");
+    fDotS();
+    printString(")>");
 }
 
 // NB: tweak this depending on what your terminal window sends for [Backspace]
@@ -153,22 +145,18 @@ int isBackSpace(char c) {
 }
 
 void handleInput(char c) {
-    static addr here = (addr)NULL;
-    static addr here1 = (addr)NULL;
-    if (here == NULL) {
-        here = (addr)HERE;
-        here1 = here;
-    }
+    static long here = 0;
+    if (here == NULL) { here = h; }
     if (c == 13) {
         printString(" ");
-        *(here1) = 0;
-        run(here);
-        here = (addr)NULL;
-        ok();
+        stb[here] = 0;
+        Run(h);
+        here = h;
+        s3();
         return;
     }
 
-    if (isBackSpace(c) && (here < here1)) {
+    if (isBackSpace(c) && (h < here1)) {
         here1--;
         if (!isOTA) {
           char b[] = {8, 32, 8, 0};
@@ -178,7 +166,7 @@ void handleInput(char c) {
     }
     if (c == 9) { c = 32; }
     if (BetweenI(c, 32, 126)) {
-        *(here1++) = c;
+        stb[here++] = c;
         if (!isOTA) { printChar(c); }
     }
 }
@@ -197,7 +185,7 @@ void setup() {
 
 void do_autoRun() {
     addr fa = 0;
-    if (fa) { run(fa); }
+    if (fa) { Run(fa); }
 }
 
 #undef LED_BUILTIN
@@ -210,7 +198,7 @@ void loop() {
 
     if (iLed == 0) {
         loadBaseSystem();
-        ok();
+        s3();
         iLed = LED_BUILTIN;
         pinMode(iLed, OUTPUT);
     }
