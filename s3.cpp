@@ -157,9 +157,9 @@ void fFloat() {
     else if (u == 'C') { fClose(); }
     else if (u == 'R') {
         t = TOS; TOS = 0; PUSH(0);
-        if (t) { TOS = fread((void*)&NOS, 1, 1, (FILE*)t); }
+        if (t) { TOS = doFread((void*)&NOS, 1, 1, t); }
     }
-    else if (u == 'W') { if (TOS) { fwrite((void*)&NOS, 1, 1, (FILE*)TOS); } s -= 2; }
+    else if (u == 'W') { if (TOS) { doFwrite((void*)&NOS, 1, 1, TOS); } s -= 2; }
 }
 void fHex() {
     PUSH(0);
@@ -209,14 +209,14 @@ void fExt() {
     if (u == '%') { NOS %= TOS; s--; } // MOD
     else if (u == ']') { u = (R0 < R1) ? 1 : 0; R0 += POP; fLoopS(u); } // +LOOP
     else if (u == 'R') {
-        if (!sd) { sd = (long)(cb+y) + clock(); } // RAND
+        if (!sd) { sd = (long)(cb+y) + timerMS(); } // RAND
         sd = (sd << 13) ^ sd; sd = (sd >> 17) ^ sd; sd = (sd << 5) ^ sd;
         PUSH(sd);
     }
     else if (u == 'L') { fLoad(); } // ABS
     else if (u == 'Y') { TOS = (long)&stb[TOS]; fSystem(); } // system
-    else if (u == 'T') { PUSH(clock()); } // TIMER/MILLIS
-    else if (u == 'N') { PUSH(clock() * 1000); } // TIMER/MICRO
+    else if (u == 'T') { PUSH(timerMS()); } // TIMER/MILLIS
+    else if (u == 'N') { PUSH(timerNS()); } // TIMER/MICROS
     else if (u == 'U') { r += 3; } // UNLOOP
     else if (u == 'W') { printf("-wait:%ld-", POP); } // WAIT
     else if (u == 'X') { init(0); p = 0; } // Reset

@@ -1,4 +1,8 @@
+#include <Arduino.h>
 #include "s3.h"
+
+long timerMS() { return millis(); }
+long timerNS() { return micros(); }
 
 #ifdef __mySerial__
     int charAvailable() { return mySerial.available(); }
@@ -18,10 +22,13 @@
 #endif // __mySerial__
 
 #ifdef __FILES__
+#include "files.h"
 #else
 long doFopen(const char *fn, int mode) { return 0; }
 void doFclose(long fh) { }
 char *doFgets(char *buf, int sz, long fh) { *buf = 0; return buf; }
+int doFread(void* buf, int sz, int num, long fh) { return 0; }
+int doFwrite(void* buf, int sz, int num, long fh) { return 0; }
 #endif // __FILES__
 
 int isOTA = 0;
@@ -84,9 +91,7 @@ long doPin(long pc) {
 long doUser(long ir, long pc) {
     switch (ir) {
     case 'G': pc = doGamePad(ir, pc);       break;
-    case 'N': PUSH(micros());               break;
     case 'P': pc = doPin(pc);               break;
-    case 'T': PUSH(millis());               break;
     case 'W': delay(POP);                   break;
     case 'L': PUSH(LED_BUILTIN);            break;
     default:

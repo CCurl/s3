@@ -16,17 +16,20 @@
     #define __PC__
 #endif
 
-// NOTE: change these  for your application
+// NOTE: change these for your application
 #ifdef __PC__
     #define CODE_SZ        (64*1024)
     #define VARS_SZ        (64*1024)
     #define FILE_SZ             10
     #define MAX_FN          0x0FFF
-#else
-    #define CODE_SZ        (12*1024)
-    #define VARS_SZ        (3*1024)
+#else // DEV BOARD
+    // TEENSY4 likes these: 64k/64k/10/0x0FFF
+    // PICO likes these:    48k/32k/10/0x07FF
+    // XIAO likes these:    16k/ 2k/10/0x03FF
+    #define CODE_SZ        (64*1024)
+    #define VARS_SZ        (64*1024)
     #define FILE_SZ             10
-    #define MAX_FN          0x01FF
+    #define MAX_FN          0x0FFF
 #endif
 
 typedef unsigned char BYTE;
@@ -45,6 +48,10 @@ typedef union { float f[VARS_SZ]; long i[VARS_SZ]; } ST_T;
     long doFopen(const char *fn, int mode) { return (long)fopen(fn, mode?"wb":"rb"); }
     void doFclose(long fh) { fclose((FILE*)fh); }
     char *doFgets(char *buf, int sz, long fh) { return fgets(buf, sz, (FILE*)fh); }
+    int doFread(void *buf, int sz, int num, long fh) { return fread(buf, sz, num, (FILE*)fh); }
+    int doFwrite(void *buf, int sz, int num, long fh) { return fwrite(buf, sz, num, (FILE*)fh); }
+    long timerMS() { return clock(); }
+    long timerNS() { return clock() * 1000; }
 #else
     // It's a board ...
     // #define _TEENSY4_
@@ -56,6 +63,8 @@ typedef union { float f[VARS_SZ]; long i[VARS_SZ]; } ST_T;
     extern long doFopen(const char *fn, int mode);
     extern void doFclose(long fh);
     extern char *doFgets(char *buf, int sz, long fh);
+    extern int doFread(void* buf, int sz, int num, long fh);
+    extern int doFwrite(void* buf, int sz, int num, long fh);
     extern void init(int files);
     extern void Run(int start);
     extern int printStringF(const char *fmt, ...);
@@ -65,6 +74,8 @@ typedef union { float f[VARS_SZ]; long i[VARS_SZ]; } ST_T;
     extern void putC(int);
     extern void printString(const char *str);
     extern long doUser(long ir, long pc);
+    extern long timerMS();
+    extern long timerNS();
 
     extern BYTE stb[];
     extern long s, h;
