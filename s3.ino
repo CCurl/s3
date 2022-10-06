@@ -1,6 +1,6 @@
 #include "s3.h"
 
-#if __SERIAL__
+#ifdef __mySerial__
     int charAvailable() { return mySerial.available(); }
     void printString(const char* str) { mySerial.print(str); }
     int getC() { 
@@ -8,15 +8,21 @@
         return mySerial.read();
     }
     void putC(int ch) { 
-        char b[2] = { (char)ch, 0 };
-        printString(b);
+        mSerial.print((char)ch);
     }
 #else
     int charAvailable() { return 0; }
     int getC() { return 0; }
     void putC(int c) { }
     void printString(const char* str) { }
-#endif
+#endif // __mySerial__
+
+#ifdef __FILES__
+#else
+long doFopen(const char *fn, int mode) { return 0; }
+void doFclose(long fh) { }
+char *doFgets(char *buf, int sz, long fh) { *buf = 0; return buf; }
+#endif // __FILES__
 
 int isOTA = 0;
 
@@ -52,7 +58,7 @@ long doGamePad(long ir, long pc) {
 #else
 long doGamePad(long ir, long pc) { printString("-noGamepad-"); return pc; }
 void gamePadBegin() { }
-#endif
+#endif // __GAMEPAD__
 
 long doPin(long pc) {
     long pin = POP;
@@ -161,7 +167,7 @@ void handleInput(char c) {
     if (c == 9) { c = 32; }
     if (btw(c, 32, 126)) {
         stb[here++] = c;
-        if (!isOTA) { printChar(c); }
+        if (!isOTA) { putC(c); }
     }
 }
 

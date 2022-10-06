@@ -1,4 +1,5 @@
 // s3.cpp - inspired by STABLE from Sandor Schneider
+
 #include "s3.h"
 
 ST_T st;
@@ -26,11 +27,11 @@ int funcN(int x) {
 void X() { if (u) { printf("-IR %ld (%c)?", u, (char)u); } p = 0; }
 void N() {}
 void fSystem() { system((char*)POP); }
-void fOpen() { t = POP; y = (char*)&stb[TOS]; TOS = (long)fopen((char*)y, (t) ? "wb" : "rb"); }
-void fClose() { if (TOS) { fclose((FILE*)TOS); } s--; }
+void fOpen() { t = POP; y = (char*)&stb[TOS]; TOS = doFopen(y, t); }
+void fClose() { t = POP; if (t) { doFclose(t); } }
 void fLoad() {
     PUSH(0); fOpen(); t = POP;
-    if (t) { if ((FILE*)fp != stdin) { fpStk[++fpSp] = fp; } fp = t; }
+    if (t) { if (fp != (long)stdin) { fpStk[++fpSp] = fp; } fp = t; }
     else { printf("-loadFail-"); }
 }
 void dotQ(int delim) {
@@ -86,7 +87,7 @@ void fCreate() {
         if (stb[p]) { if (stb[p] < 32) { stb[p] = 32; } ++p; }
         else {
             if (fp == (long)stdin) { printString(": "); }
-            fgets((char*)&stb[p], 128, (FILE*)fp);
+            doFgets((char*)&stb[p], 128, fp);
         }
     }
     if (h < (++p)) { h = p; st.i[0] = h; }
@@ -243,7 +244,7 @@ void Hist(char* s) { FILE* fp = fopen("h.txt", "at"); if (fp) { fprintf(fp, "%s"
 void Loop() {
     if (feof((FILE*)fp)) {
         if (fp == (long)stdin) { exit(0); }
-        PUSH(fp); fClose();
+        doFclose(fp);
         fp = (0 < fpSp) ? fpStk[--fpSp] : (long)stdin;
     }
     if (fp == (long)stdin) { printString("\ns3:("); fDotS(); printString(")>"); }
@@ -260,8 +261,8 @@ int main(int argc, char* argv[]) {
         if ((t) || (y[0] == '0' && y[1] == 0)) { st.i[lb + i] = t; }
         else { st.i[lb + i] = u; for (int j = 0; y[j]; j++) { stb[u++] = y[j]; } stb[u++] = 0; }
     }
-    if ((argc > 1) && (argv[1][0] != '-')) { fp = (long)fopen(argv[1], "rb"); }
-    if (!fp) { fp = (long)fopen("src.s3", "rb"); }
+    if ((argc > 1) && (argv[1][0] != '-')) { fp = doFopen(argv[1], 0); }
+    if (!fp) { fp = doFopen("src.s3", 0); }
     if (!fp) { fp = (long)stdin; }
     while (1) { Loop(); }
     return 0;

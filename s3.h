@@ -10,11 +10,24 @@
 #define R1       st.i[r+1]
 #define R2       st.i[r+2]
 
+#ifdef _WIN32
+    #define __PC__
+#elif _LINUX
+    #define __PC__
+#endif
+
 // NOTE: change these  for your application
-#define CODE_SZ        (64*1024)
-#define VARS_SZ        (64*1024)
-#define FILE_SZ             10
-#define MAX_FN          0x07FF
+#ifdef __PC__
+    #define CODE_SZ        (64*1024)
+    #define VARS_SZ        (64*1024)
+    #define FILE_SZ             10
+    #define MAX_FN          0x0FFF
+#else
+    #define CODE_SZ        (12*1024)
+    #define VARS_SZ        (3*1024)
+    #define FILE_SZ             10
+    #define MAX_FN          0x01FF
+#endif
 
 typedef unsigned char BYTE;
 typedef union { float f[VARS_SZ]; long i[VARS_SZ]; } ST_T;
@@ -24,40 +37,38 @@ typedef union { float f[VARS_SZ]; long i[VARS_SZ]; } ST_T;
 #include <math.h>
 #include <time.h>
 
-#ifdef _WIN32
-	#define __PC__
-	int  getC() { return fgetc(stdin); }
-	void putC(int c) { putc(c, stdout); }
-	void printString(const char *s) { printf(s); }
-	long doUser(long ir, long pc) { return pc; }
-#elif _LINUX
-	#define __PC__
-	int getC() { return fgetc(stdin); }
-	void putC(int c) { putc(c, stdout); }
-	void printString(const char *s) { printf(s); }
-	long doUser(long ir, long pc) { return pc; }
+#ifdef __PC__
+    int getC() { return fgetc(stdin); }
+    void putC(int c) { putc(c, stdout); }
+    void printString(const char *s) { fputs(s, stdout); }
+    long doUser(long ir, long pc) { return pc; }
+    long doFopen(const char *fn, int mode) { return (long)fopen(fn, mode?"wb":"rb"); }
+    void doFclose(long fh) { fclose((FILE*)fh); }
+    char *doFgets(char *buf, int sz, long fh) { return fgets(buf, sz, (FILE*)fh); }
 #else
-	// It's a board ...
-	// #define _TEENSY4_
-	// #define _XIAO_
-	#define _PICO_
-	// #define _FILES_
-	// #define __GAMEPAD__
-	#define putC(c)         printChar(c)
-	#define printString(s)  printSerial(s)
-	extern void init(int);
-	extern void Run(int);
-	extern int printStringF(const char *fmt, ...);
-	extern int charAvailable();
-	extern void fDotS();
-	extern int getC();
-	extern void putC(int);
-	extern void printString(const char *);
-	extern long doUser(long, long);
+    // It's a board ...
+    // #define _TEENSY4_
+    // #define _XIAO_
+    #define _PICO_
+    #define mySerial Serial
+    // #define __FILES__
+    // #define __GAMEPAD__
+    extern long doFopen(const char *fn, int mode);
+    extern void doFclose(long fh);
+    extern char *doFgets(char *buf, int sz, long fh);
+    extern void init(int files);
+    extern void Run(int start);
+    extern int printStringF(const char *fmt, ...);
+    extern int charAvailable();
+    extern void fDotS();
+    extern int getC();
+    extern void putC(int);
+    extern void printString(const char *str);
+    extern long doUser(long ir, long pc);
 
-	extern BYTE stb[];
-	extern long s, h;
-	extern ST_T st;
-#endif
+    extern BYTE stb[];
+    extern long s, h;
+    extern ST_T st;
+#endif // __PC__
 
 #endif // __s3_h__
