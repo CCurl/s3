@@ -4,7 +4,7 @@
 long timerMS() { return millis(); }
 long timerNS() { return micros(); }
 
-#ifdef __mySerial__
+#ifdef mySerial
     int charAvailable() { return mySerial.available(); }
     void printString(const char* str) { mySerial.print(str); }
     int getC() { 
@@ -12,7 +12,7 @@ long timerNS() { return micros(); }
         return mySerial.read();
     }
     void putC(int ch) { 
-        mSerial.print((char)ch);
+        mySerial.print((char)ch);
     }
 #else
     int charAvailable() { return 0; }
@@ -101,10 +101,10 @@ long doUser(long ir, long pc) {
 }
 
 void loadCode(const char* src) {
+    printString(src);
+    return;
     long here = h;
-    while (*src) {
-        stb[here++] = *(src++);
-    }
+    while (*src) { stb[here++] = *(src++); }
     stb[here] = 0;
     Run(h);
 }
@@ -113,27 +113,8 @@ void loadCode(const char* src) {
 // * HERE is where you load your default code *
 // ********************************************
 
-#define SOURCE_STARTUP \
-    X(1000, ":Code 0@1[nc@#58=(n1-c@59=(13,10,),];") \
-
-//#if __BOARD__ == ESP8266
-#define X(num, val) const char str ## num[] = val;
-//#else
-//#define X(num, val) const PROGMEM char str ## num[] = val;
-//#endif
-SOURCE_STARTUP
-
-#undef X
-#define X(num, val) str ## num,
-const char *bootStrap[] = {
-    SOURCE_STARTUP
-    NULL
-};
-
 void loadBaseSystem() {
-    for (int i = 0; bootStrap[i] != NULL; i++) {
-        loadCode(bootStrap[i]);
-    }
+  loadCode(":Code 0@1[nc@#58=(n1-c@59=(13,10,),];");
 }
 
 void s3() {
@@ -182,15 +163,15 @@ void setup() {
     while (!mySerial) {}
     delay(500);
     // while (mySerial.available()) { char c = mySerial.read(); }
-    ok();
 #endif
     init(1);
-    gamePadBegin();
+    // s3();
+    // gamePadBegin();
 }
 
 void do_autoRun() {
-    long fa = st.i[1];
-    if (fa) { Run(fa); }
+    // long x = st.i[1];
+    // if (x) { Run(x); }
 }
 
 #undef LED_BUILTIN
@@ -199,11 +180,12 @@ void loop() {
     static int iLed = 0;
     static long nextBlink = 0;
     static int ledState = LOW;
-    long curTm = millis();
+    long curTm = timerMS();
 
     if (iLed == 0) {
         loadBaseSystem();
         s3();
+        printString("base system loaded");
         iLed = LED_BUILTIN;
         pinMode(iLed, OUTPUT);
     }
