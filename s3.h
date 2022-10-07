@@ -26,10 +26,10 @@
     // TEENSY4 likes these: 64k/64k/10/0x0FFF
     // PICO likes these:    48k/32k/10/0x07FF
     // XIAO likes these:    16k/ 2k/10/0x03FF
-    #define CODE_SZ        (16*1024)
-    #define VARS_SZ        (2*1024)
+    #define CODE_SZ        (48*1024)
+    #define VARS_SZ        (32*1024)
     #define FILE_SZ             10
-    #define MAX_FN          0x03FF
+    #define MAX_FN          0x07FF
 #endif
 
 typedef unsigned char BYTE;

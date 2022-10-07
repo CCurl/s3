@@ -1,5 +1,7 @@
 #include <Arduino.h>
+#include <stdarg.h>
 #include "s3.h"
+
 
 long timerMS() { return millis(); }
 long timerNS() { return micros(); }
@@ -116,11 +118,11 @@ long doUser(long ir, long pc) {
 }
 
 void loadCode(const char* src) {
+    long x = h;
     printString(src);
-    return;
-    long here = h;
-    while (*src) { stb[here++] = *(src++); }
-    stb[here] = 0;
+    printString("\r\n");
+    while (*src) { stb[x++] = *(src++); }
+    stb[x] = 0;
     Run(h);
 }
 
@@ -130,6 +132,7 @@ void loadCode(const char* src) {
 
 void loadBaseSystem() {
   loadCode(":Code 0@1[nc@#58=(n1-c@59=(13,10,),];");
+  loadCode(":Mil 1000**;");
 }
 
 void s3() {
