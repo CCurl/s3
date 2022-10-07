@@ -26,10 +26,10 @@
     // TEENSY4 likes these: 64k/64k/10/0x0FFF
     // PICO likes these:    48k/32k/10/0x07FF
     // XIAO likes these:    16k/ 2k/10/0x03FF
-    #define CODE_SZ        (64*1024)
-    #define VARS_SZ        (64*1024)
+    #define CODE_SZ        (48*1024)
+    #define VARS_SZ        (32*1024)
     #define FILE_SZ             10
-    #define MAX_FN          0x0FFF
+    #define MAX_FN          0x07FF
 #endif
 
 typedef unsigned char BYTE;
@@ -41,6 +41,7 @@ typedef union { float f[VARS_SZ]; long i[VARS_SZ]; } ST_T;
 #include <time.h>
 
 #ifdef __PC__
+    #define printStringF printf
     int getC() { return fgetc(stdin); }
     void putC(int c) { putc(c, stdout); }
     void printString(const char *s) { fputs(s, stdout); }
@@ -67,12 +68,12 @@ typedef union { float f[VARS_SZ]; long i[VARS_SZ]; } ST_T;
     extern int doFwrite(void* buf, int sz, int num, long fh);
     extern void init(int files);
     extern void Run(int start);
-    extern int printStringF(const char *fmt, ...);
     extern int charAvailable();
     extern void fDotS();
     extern int getC();
     extern void putC(int);
     extern void printString(const char *str);
+    extern void printStringF(const char *fmt, ...);
     extern long doUser(long ir, long pc);
     extern long timerMS();
     extern long timerNS();
