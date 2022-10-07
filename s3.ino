@@ -5,6 +5,11 @@ long timerMS() { return millis(); }
 long timerNS() { return micros(); }
 
 #ifdef mySerial
+    void SerialInit() {
+        mySerial.begin(19200);
+        while (!mySerial) {}
+        delay(500);
+    }
     int charAvailable() { return mySerial.available(); }
     void printString(const char* str) { mySerial.print(str); }
     int getC() { 
@@ -14,11 +19,21 @@ long timerNS() { return micros(); }
     void putC(int ch) { 
         mySerial.print((char)ch);
     }
+    void printStringF(const char* fmt, ...) {
+        char buf[64];
+        va_list args;
+        va_start(args, fmt);
+        vsnprintf(buf, sizeof(buf), fmt, args);
+        va_end(args);
+        printString(buf);
+    }
 #else
+    void SerialInit() { }
     int charAvailable() { return 0; }
     int getC() { return 0; }
     void putC(int c) { }
     void printString(const char* str) { }
+    void printStringF(const char* fmt, ...) { }
 #endif // __mySerial__
 
 #ifdef __FILES__
@@ -158,15 +173,10 @@ void handleInput(char c) {
 }
 
 void setup() {
-#ifdef __SERIAL__
-    mySerial.begin(19200);
-    while (!mySerial) {}
-    delay(500);
-    // while (mySerial.available()) { char c = mySerial.read(); }
-#endif
+    SerialInit();
     init(1);
     // s3();
-    // gamePadBegin();
+    gamePadBegin();
 }
 
 void do_autoRun() {
@@ -174,8 +184,8 @@ void do_autoRun() {
     // if (x) { Run(x); }
 }
 
-#undef LED_BUILTIN
-#define LED_BUILTIN 16
+// #undef LED_BUILTIN
+// #define LED_BUILTIN 16
 void loop() {
     static int iLed = 0;
     static long nextBlink = 0;
@@ -184,8 +194,8 @@ void loop() {
 
     if (iLed == 0) {
         loadBaseSystem();
+        printString("-base system loaded-\r\n");
         s3();
-        printString("base system loaded");
         iLed = LED_BUILTIN;
         pinMode(iLed, OUTPUT);
     }

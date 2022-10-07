@@ -24,7 +24,7 @@ int funcN(int x) {
     fn = (hh & MAX_FN); fa = funcs[fn];
     return x;
 }
-void X() { if (u) { printf("-IR %ld (%c)?", u, (char)u); } p = 0; }
+void X() { if (u) { printStringF("-IR %ld (%c)?", u, (char)u); } p = 0; }
 void N() {}
 void fSystem() { system((char*)POP); }
 void fOpen() { t = POP; y = (char*)&stb[TOS]; TOS = doFopen(y, t); }
@@ -32,7 +32,7 @@ void fClose() { t = POP; if (t) { doFclose(t); } }
 void fLoad() {
     PUSH(0); fOpen(); t = POP;
     if (t) { if (fp != (long)stdin) { fpStk[++fpSp] = fp; } fp = t; }
-    else { printf("-loadFail-"); }
+    else { printString("-loadFail-"); }
 }
 void dotQ(int delim) {
     y = (char*)&stb[p];
@@ -41,14 +41,14 @@ void dotQ(int delim) {
         char c = *(y++); if (delim) { ++p; }
         if (c == '%') {
             c = *(y++); if (delim) { ++p; }
-            if (c == 'd') { printf("%ld", POP); }
+            if (c == 'd') { printStringF("%ld", POP); }
             else if (c == 'c') { putC((int)POP); }
             else if (c == 'e') { putC(27); }
-            else if (c == 'f') { printf("%g", st.f[s--]); }
+            else if (c == 'f') { printStringF("%g", st.f[s--]); }
             else if (c == 'n') { putC(13); putC(10); }
             else if (c == 'q') { putC('"'); }
-            else if (c == 'X') { printf("%lX", POP); }
-            else if (c == 'x') { printf("%lx", POP); }
+            else if (c == 'X') { printStringF("%lX", POP); }
+            else if (c == 'x') { printStringF("%lx", POP); }
             else { putC(c); }
         }
         else { putC(c); }
@@ -63,7 +63,7 @@ void fOver() { t = NOS; PUSH(t); }
 void fDrop() { --s; }
 void fSlMod() { u = NOS; t = TOS; NOS = u / t; TOS = u % t; }
 void fAscii() { PUSH(stb[p++]); }
-void fDot() { printf("%ld", POP); }
+void fDot() { printStringF("%ld", POP); }
 void fEmit() { putC(POP); }
 void fIf() { if (POP == 0) { while (stb[p++] != ')'); } }
 void fAdd() { NOS += TOS; s--; }
@@ -79,7 +79,7 @@ void fCreate() {
     if (stb[p] == '_') { PUSH(++p); u = 999; }
     else {
         p = funcN(p);
-        if (fa) { printf("-redef:%ld to %ld,hash(%ld)-", fa, p, fn); }
+        if (fa) { printStringF("-redef:%ld to %ld,hash(%ld)-", fa, p, fn); }
     }
     while (stb[p] == ' ') { ++p; }
     if (u != 999) { funcs[fn] = p; }
@@ -99,7 +99,7 @@ void fGT() { NOS = (NOS > TOS) ? -1 : 0; s--; }
 void fLookup() { p = funcN(p); PUSH(fa); PUSH(fn); }
 void fFetch() { TOS = st.i[TOS]; }
 void doExec(long addr) {
-    if (!addr) { printf("-noimpl-"); return; }
+    if (!addr) { printString("-noimpl-"); return; }
     if ((stb[p] != ';') && (stb[p] != '^')) { st.i[--r] = p; }
     p = addr;
 }
@@ -140,7 +140,7 @@ void fWord() {
 }
 void fFloat() {
     u = stb[p++]; // printf("-flt:%c-",u);
-    if (u == '.') { printf("%g", st.f[s--]); }
+    if (u == '.') { printStringF("%g", st.f[s--]); }
     else if (u == '@') { st.f[s] = st.f[TOS]; }
     else if (u == '!') { st.f[TOS] = st.f[s - 1]; s -= 2; }
     else if (u == '+') { st.f[s - 1] += st.f[s]; s--; }
@@ -202,7 +202,7 @@ void fRegSet() {
 }
 void fMOp() { u = stb[p++]; if (u == '@') { TOS = *(char*)TOS; } } // else if (u=='!') { *(char*)TOS=(char)NOS; s-=2; } }
 void fIndex() { PUSH(R0); }
-void fDotS() { for (int i = sb; i <= s; i++) { printf("%c%ld", (i == sb) ? 0 : 32, st.i[i]); } }
+void fDotS() { for (int i=sb; i<=s; i++) { if (sb<i) { putC(32); } printStringF("%ld", st.i[i]); } }
 void fType() { y = (char*)&stb[POP]; puts(y); }
 void fExt() {
     u = stb[p++];
@@ -218,7 +218,7 @@ void fExt() {
     else if (u == 'T') { PUSH(timerMS()); } // TIMER/MILLIS
     else if (u == 'N') { PUSH(timerNS()); } // TIMER/MICROS
     else if (u == 'U') { r += 3; } // UNLOOP
-    else if (u == 'W') { printf("-wait:%ld-", POP); } // WAIT
+    else if (u == 'W') { printStringF("-wait:%ld-", POP); } // WAIT
     else if (u == 'X') { init(0); p = 0; } // Reset
     else if (u == 'Q') { exit(0); } // Exit s3
 }

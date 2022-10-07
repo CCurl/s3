@@ -20,15 +20,15 @@ s3 ...
 ... supports up to MAX_FN (default is 2048) words.
 ... runs under Windows
 ... runs under Linux
-... TODO: runs on development boards via the Arduino IDE
+... runs on development boards via the Arduino IDE
 ```
 ## Why s3?
-Many interpreted environments a large SWITCH statement with cases in a loop to execute the user's program. In these systems, the the "machine code"'s opcodes (the cases in the SWITCH statement) are often arbitrarily assigned and are not human-readable, so they have no meaning to the programmer when looking at the code that is actually being executed. Additionally a compiler and/or interpreter are included to create and execute the programs in that environment. In these enviromnents, there is a steep learning curve ... the programmer needs to learn the programming language, the hundreds (or thousands) of user functions in the libraries (or "WORDS" in Forth), how to use the compiler, and how to use the interpreter. I wanted to avoid as much as that as possible, and have only one thing to learn: the "machine code".
+Many interpreted environments have a large SWITCH statement with cases in a loop to execute the user's program. In these systems, the "virtual machine language" opcodes (the cases in the SWITCH statement) are often arbitrarily assigned and are not human-readable, so they have no meaning to the programmer when looking at the code that is actually being executed. Additionally a compiler and/or interpreter are included to create and execute the programs in that environment. In these enviromnents, there is a steep learning curve ... the programmer needs to learn the programming language, the hundreds (or thousands) of user functions in the libraries (or "WORDS" in Forth), how to use the compiler, and how to use the interpreter. I wanted to avoid as much as that as possible, and have only one thing to learn: the "virtual machine language".
 
 ## Goals for s3
-1. No need for a multiple gigabyte tool chain and the edit/compile/run paradigm for developing everyday programs.
+1. Freedom from a multiple gigabyte tool chain and the edit/compile/run paradigm for developing everyday programs.
 
-2. A simple, minimal, and interactive programming environment that can be modified easily.
+2. A simple, minimal, and interactive programming environment that can be extended and modified easily.
 
 3. An environment that can be easily configured for and deployed to many different types of development boards via the Arduino IDE.
 
@@ -39,8 +39,10 @@ Many interpreted environments a large SWITCH statement with cases in a loop to e
 ## Building s3
 ```
 - Windows: I use Visual Studio, the s3.sln. Use the x86 configuration, 64-bit doesn't work.
+
 - Linux: There is a simple ./make shell script. GCC or CLANG, your choice; 32 or 64 bit both work.
-- Development Boards: Use the Arduino IDE, edit the BSZ, ISZ and FILES_SZ as appropriate.
+
+- Development Boards: Use the Arduino IDE, edit the *_SZ, defines as appropriate for the board.
   - NOTE: this part is currently under development
 ```
 
