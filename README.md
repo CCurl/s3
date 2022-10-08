@@ -43,7 +43,6 @@ Many interpreted environments have a large SWITCH statement with cases in a loop
 - Linux: There is a simple ./make shell script. GCC or CLANG, your choice; 32 or 64 bit both work.
 
 - Development Boards: Use the Arduino IDE, edit the *_SZ, defines as appropriate for the board.
-  - NOTE: this part is currently under development
 ```
 
 ## Some s3 examples
