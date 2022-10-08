@@ -57,12 +57,12 @@ Many interpreted environments have a large SWITCH statement with cases in a loop
 
 ; A simple benchmark for a 100 million FOR loop:
     :Mil 1000 # * *;
-    :Bench 0(n--) t $ 0[] t $ -;
+    :Bench 0(n--) xT $ 0[] xT $ -;
     100 Mil Bench . "usec"
 
 ; A simple benchmark for a 100 million WHILE loop:
     :Mil 1000#**;
-    :Bench 0(n--) t${1-#}\t$-." usec";
+    :Bench 0(n--) xT${d#}\xT$-." usec";
     100 Mil Bench ." usec" 0(note that spaces are optional)
 
 ; Define a word to display the currently defined code:
