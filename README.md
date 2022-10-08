@@ -221,8 +221,8 @@ xY     (a--)      Calls system(a).
 |XXX|  (a--b)     Copies XXX to address a, b is the next address after the NULL terminator.
 z      (a--)      ZTYPE: Output the formatted string at address a (see ").
 t      (a--)      TYPE: Output the string at address a (no formatting).
-xK?    (--f)      TODO: f: 1 if a character is waiting in the input buffer, else 0.
-xK@    (--c)      TODO: c: next character from the input buffer. If no character, wait.
+k?     (--f)      TODO: f: 1 if a character is waiting in the input buffer, else 0.
+k@     (--c)      TODO: c: next character from the input buffer. If no character, wait.
 
 
 *** CONDITIONS/LOOPS/FLOW CONTROL ***
@@ -230,13 +230,13 @@ xK@    (--c)      TODO: c: next character from the input buffer. If no character
 =     (a b--f)    f: (a = b) ? 1 : 0;
 >     (a b--f)    f: (a > b) ? 1 : 0;
 ~     (n -- f)    f: (a = 0) ? 1 : 0; (Logical NOT)
-[     (T F--)     For: start a For/Next loop.
+[     (T F--)     FOR: start a FOR/NEXT loop.
 n     (--n)       n: the index of the current FOR loop
 ]     (--)        NEXT: increment index (n) and stop if (T<=n)
 x]    (N--)       +NEXT: Add N to the index (n) and stop if (n==T) or (n crosses T)
 {     (--)        BEGIN While loop
 }     (f--)       WHILE: if (f != 0) jump back to BEGIN, else continue
-xU    (--)        UNLOOP: Unwind the LOOP stack
+xU    (--)        UNLOOP: Unwind the LOOP stack (either FOR or WHILE loops)
 (     (f--)       IF: if (f == 0), skip to next ')'.
 
 
