@@ -5,7 +5,7 @@ The following statements can be made about s3.
 ```
 s3 ...
 
-... is a full-featured, interactive, stack-based, interpreter/VM, implemented in about 250 lines of C code.
+... is a full-featured, interactive, stack-based, and minimal interpreter/VM.
 ... has 100% human-readable (and understandable!) "machine code".
 ... has no compilation phase; it executes the source code directly.
 ... provides 26 registers, [rA..rZ].
