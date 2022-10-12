@@ -203,7 +203,7 @@ void fRegSet() {
 void fMOp() { u = stb[p++]; if (u == '@') { TOS = *(char*)TOS; } } // else if (u=='!') { *(char*)TOS=(char)NOS; s-=2; } }
 void fIndex() { PUSH(R0); }
 void fDotS() { for (int i=sb; i<=s; i++) { if (sb<i) { putC(32); } printStringF("%ld", st.i[i]); } }
-void fType() { y = (char*)&stb[POP]; puts(y); }
+void fType() { y = (char*)&stb[POP]; fputs(y, stdout); }
 void fExt() {
     u = stb[p++];
     if (u == '%') { NOS %= TOS; s--; } // MOD
