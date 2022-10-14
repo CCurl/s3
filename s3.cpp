@@ -47,6 +47,7 @@ void dotQ(int delim) {
             else if (c == 'f') { printStringF("%g", st.f[s--]); }
             else if (c == 'n') { putC(13); putC(10); }
             else if (c == 'q') { putC('"'); }
+            else if (c == 's') { printString((char*)&stb[POP]); }
             else if (c == 'X') { printStringF("%lX", POP); }
             else if (c == 'x') { printStringF("%lx", POP); }
             else { putC(c); }
