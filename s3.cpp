@@ -3,13 +3,13 @@
 #include "s3.h"
 
 ST_T st;
-static char* y;
+static char *y;
 BYTE stb[CODE_SZ];
-long cb=1, h, sb = 4, rb = 64, rg = 68, lb = 125, r, s, t, u, fpSp;
+long h, sb = 4, rb = 64, rg = 68, lb = 125, r, s, t, u, fpSp;
 long fn, fa, p, sd, fp, funcs[MAX_FN + 1], fpStk[FILE_SZ];
 
 void init(int files) {
-    s = sb - 1; h = cb = 1;
+    s = sb - 1; h = 1;
     for (int i = 0; i < CODE_SZ; i++) { stb[i] = 0; }
     for (int i = 0; i < VARS_SZ; i++) { st.i[i] = 0; }
     for (int i = 0; i <= MAX_FN; i++) { funcs[i] = 0; }
@@ -109,11 +109,11 @@ void fExec() { doExec(POP); }
 void AZ() { p = funcN(p - 1); doExec(fa); }
 void fDo() { r -= 3; st.i[r + 2] = p; st.i[r] = POP; st.i[r + 1] = POP; }
 void fLoopS(int x) {
-    if ((x == 1) && (R0 < R1)) { p = st.i[r + 2]; return; }
-    if ((x == 0) && (R0 > R1)) { p = R2; return; }
+    if ((x==1) && (R0 < R1)) { p = R2; return; }
+    if ((x==0) && (R0 > R1)) { p = R2; return; }
     r += 3;
 }
-void fLoop() { ++st.i[r]; fLoopS(1); }
+void fLoop() { if (++R0 < R1) { p = R2; } else { r += 3; } }
 void fLeave() { p = st.i[r++]; }
 void fNeg() { TOS = -TOS; }
 void fSys() {
@@ -205,15 +205,16 @@ void fMOp() { u = stb[p++]; if (u == '@') { TOS = *(char*)TOS; } } // else if (u
 void fIndex() { PUSH(R0); }
 void fDotS() { for (int i=sb; i<=s; i++) { if (sb<i) { putC(32); } printStringF("%ld", st.i[i]); } }
 void fType() { y = (char*)&stb[POP]; fputs(y, stdout); }
+void fRand() {
+    if (!sd) { sd = (long)(y)+timerMS(); }
+    sd = (sd << 13) ^ sd; sd = (sd >> 17) ^ sd; sd = (sd << 5) ^ sd;
+    PUSH(sd);
+}
 void fExt() {
     u = stb[p++];
     if (u == '%') { NOS %= TOS; s--; } // MOD
     else if (u == ']') { u = (R0 < R1) ? 1 : 0; R0 += POP; fLoopS(u); } // +LOOP
-    else if (u == 'R') {
-        if (!sd) { sd = (long)(cb+y) + timerMS(); } // RAND
-        sd = (sd << 13) ^ sd; sd = (sd >> 17) ^ sd; sd = (sd << 5) ^ sd;
-        PUSH(sd);
-    }
+    else if (u == 'R') { fRand(); }
     else if (u == 'L') { fLoad(); } // ABS
     else if (u == 'Y') { TOS = (long)&stb[TOS]; fSystem(); } // system
     else if (u == 'T') { PUSH(timerMS()); } // TIMER/MILLIS
