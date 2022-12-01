@@ -12,6 +12,7 @@
 
 #ifdef _WIN32
     #define __PC__
+    #define _CRT_SECURE_NO_WARNINGS
 #elif _LINUX
     #define __PC__
 #endif
