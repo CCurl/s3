@@ -231,7 +231,7 @@ void fQt() { while (stb[p] != '|') { stb[TOS++] = stb[p++]; } stb[TOS++] = 0; ++
 void fWhile() { if (POP) { p = R0; } else { r += 3; } }
 void fLNot() { TOS = (TOS) ? 0 : -1; }
 
-void (*q[128])() = {
+void (*jmpTbl[128])() = {
     X,X,X,X,X,X,X,X,X,X,N,X,X,N,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,                        //   0:31
     N,fStore,fDotQ,fDup,fSwap,fOver,fSlMod,fAscii,fIf,N,fMult,fAdd,fEmit,fSub,fDot,fDiv,    //  32:47
     n09,n09,n09,n09,n09,n09,n09,n09,n09,n09,fCreate,fRet,fLT,fEq,fGT,fLookup,               //  48:63
@@ -240,9 +240,9 @@ void (*q[128])() = {
     fSys,fAbs,fBit,fCOp,fRegDec,fExec,fFloat,fGoto,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,  //  96:111
     X,fDotS,fRegGet,fRegSet,fType,fUser,X,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };  // 112:127
 
-void Run(int x) { s = (s < sb) ? (sb - 1) : s; r = rb; p = x; while (p) { u = stb[p++]; q[u](); } }
+void Run(int x) { s=(s<sb)?(sb-1):s; r=rb; p=x; while (p) { u=stb[p++]; jmpTbl[u](); } }
 #ifdef __PC__
-void Hist(char* s) { FILE* fp = fopen("h.txt", "at"); if (fp) { fprintf(fp, "%s", s); fclose(fp); } }
+void Hist(char *s) { FILE *fp = fopen("h.txt", "at"); if (fp) { fprintf(fp, "%s", s); fclose(fp); } }
 void Loop() {
     if (feof((FILE*)fp)) {
         if (fp == (long)stdin) { exit(0); }
@@ -250,8 +250,8 @@ void Loop() {
         fp = (0 < fpSp) ? fpStk[--fpSp] : (long)stdin;
     }
     if (fp == (long)stdin) { printString("\ns3:("); fDotS(); printString(")>"); }
-    stb[h] = 0; fgets((char*)&stb[h], 128, (FILE*)fp);
-    if (fp == (long)stdin) { Hist((char*)&stb[h]); }
+    y = (char*)&stb[h]; *y = 0; doFgets(y, 128, fp);
+    if (fp == (long)stdin) { Hist(y); }
     Run(h);
 }
 int main(int argc, char* argv[]) {
