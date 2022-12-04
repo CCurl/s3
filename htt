@@ -1,0 +1,3 @@
+#/bin/sh
+clang -o ht -m32 ht.c
+./ht
