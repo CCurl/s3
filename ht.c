@@ -3,17 +3,16 @@
 #include <stdio.h>
 #include <time.h>
 
-#define bk 1023 // # buckets
+#define bk 2047 // # buckets
 
 unsigned short doHash1(const char *v) {
-    int h = 0;
-    unsigned char c;
-    while (*v++) { h=(31*h)+*(v++); }
+    int h = *(v++);
+    while (*v) { h=(33*h)+*(v++); }
     return h & bk;
 }
 
 unsigned short doHash2(const char *v) {
-    int h = 5381;
+    int h = *(v++);
     while (*v) { h = ((h<<3)^h)+(*(v++)); }
     return h & bk;
 }
