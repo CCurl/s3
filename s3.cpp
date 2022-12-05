@@ -5,11 +5,12 @@
 ST_T st;
 static char *y;
 BYTE stb[CODE_SZ];
-long h, sb = 4, rb = 64, rg = 68, lb = 125, r, s, t, u, fpSp;
-long fn, fa, p, sd, fp, funcs[MAX_FN + 1], fpStk[FILE_SZ];
+long locs[LOCS_SZ+10], lb;
+long h, sb = 4, rb = 64, r, s, t, u, fpSp;
+long fn, fa, p, sd, fp, funcs[MAX_FN+1], fpStk[FILE_SZ];
 
 void init(int files) {
-    s = sb - 1; h = 1;
+    s = sb - 1; h = 1; lb = 0;
     for (int i = 0; i < CODE_SZ; i++) { stb[i] = 0; }
     for (int i = 0; i < VARS_SZ; i++) { st.i[i] = 0; }
     for (int i = 0; i <= MAX_FN; i++) { funcs[i] = 0; }
@@ -169,35 +170,35 @@ void fHex() {
         else { return; }
     }
 }
-void fRegInc() {
-    u = stb[p++];
-    if (btw(u, 'A', 'Z')) { st.i[u]++; }
-    else if (btw(u, '0', '9')) { st.i[lb + u - '0']++; }
-    else { --p; ++TOS; }
+void fLoc() {
+    u = stb[p++]; if (u == '+') { lb += (lb < LOCS_SZ) ? 10 : 0; }
+    else if (u == '-') { lb -= (0<lb) ? 10 : 0; }
 }
 void fRegDec() {
     u = stb[p++];
     if (btw(u, 'A', 'Z')) { st.i[u]--; }
-    else if (btw(u, '0', '9')) { st.i[lb + u - '0']--; }
+    else if (btw(u, '0', '9')) { locs[lb + u - '0']--; }
     else { --p; --TOS; }
 }
-void fLoc() {
-    u = stb[p++]; if (u == '+') { lb += (lb < 185) ? 10 : 0; }
-    else if (u == '-') { lb -= (125 < lb) ? 10 : 0; }
-}
-void fKey() {
-    u = stb[p++]; if (u == '?') { PUSH(0); /*TODO!*/ }
-    else if (u == '@') { PUSH(getC()); }
+void fRegInc() {
+    u = stb[p++];
+    if (btw(u, 'A', 'Z')) { st.i[u]++; }
+    else if (btw(u, '0', '9')) { locs[lb + u - '0']++; }
+    else { --p; ++TOS; }
 }
 void fRegGet() {
     u = stb[p++]; PUSH(0);
     if (btw(u, 'A', 'Z')) { TOS = st.i[u]; }
-    else if (btw(u, '0', '9')) { TOS = st.i[lb + u - '0']; }
+    else if (btw(u, '0', '9')) { TOS = locs[lb + u - '0']; }
 }
 void fRegSet() {
     u = stb[p++]; t = POP;
     if (btw(u, 'A', 'Z')) { st.i[u] = t; }
-    else if (btw(u, '0', '9')) { st.i[lb + u - '0'] = t; }
+    else if (btw(u, '0', '9')) { locs[lb + u - '0'] = t; }
+}
+void fKey() {
+    u = stb[p++]; if (u == '?') { PUSH(0); /*TODO!*/ }
+    else if (u == '@') { PUSH(getC()); }
 }
 void fMOp() { u = stb[p++]; if (u == '@') { TOS = *(char*)TOS; } } // else if (u=='!') { *(char*)TOS=(char)NOS; s-=2; } }
 void fIndex() { PUSH(R0); }
