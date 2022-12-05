@@ -5,12 +5,16 @@
 ST_T st;
 static char *y;
 BYTE stb[CODE_SZ];
-long locs[LOCS_SZ+10], lb;
+long locs[LOCS_SZ+10], lb, lstk[LOOP_SZ+1], lsp;
 long h, sb = 4, rb = 64, r, s, t, u, fpSp;
 long fn, fa, p, sd, fp, funcs[MAX_FN+1], fpStk[FILE_SZ];
 
+#define L0 lstk[lsp]
+#define L1 lstk[lsp-1]
+#define L2 lstk[lsp-2]
+
 void init(int files) {
-    s = sb - 1; h = 1; lb = 0;
+    s = sb - 1; h = 1; lb = lsp = 0;
     for (int i = 0; i < CODE_SZ; i++) { stb[i] = 0; }
     for (int i = 0; i < VARS_SZ; i++) { st.i[i] = 0; }
     for (int i = 0; i <= MAX_FN; i++) { funcs[i] = 0; }
@@ -106,13 +110,16 @@ void doExec(long addr) {
 void fGoto() { p = POP; }
 void fExec() { doExec(POP); }
 void AZ() { p = funcN(p - 1); doExec(fa); }
-void fDo() { r -= 3; R2 = p; R0 = POP; R1 = POP; }
+void fDo() { lsp += 3; L0 = POP; L1 = POP; L2 = p; }
 void fLoopS(int x) {
-    if ((x==0) && (R0 > R1)) { p = R2; return; }
-    if ((x==1) && (R0 < R1)) { p = R2; return; }
-    r += 3;
+    if ((x==0) && (L0>L1)) { p = L2; return; }
+    if ((x==1) && (L0<L1)) { p = L2; return; }
+    lsp -= 3;
 }
-void fLoop() { if (++R0 < R1) { p = R2; } else { r += 3; } }
+void fLoop() { if (++L0 < L1) { p = L2; } else { lsp -= 3; } }
+void fBegin() { lsp += 3; L0 = p; }
+void fWhile() { if (POP) { p = L0; } else { lsp -= 3; } }
+void fIndex() { PUSH(L0); }
 void fLeave() { p = st.i[r++]; }
 void fNeg() { TOS = -TOS; }
 void fSys() {
@@ -201,7 +208,6 @@ void fKey() {
     else if (u == '@') { PUSH(getC()); }
 }
 void fMOp() { u = stb[p++]; if (u == '@') { TOS = *(char*)TOS; } } // else if (u=='!') { *(char*)TOS=(char)NOS; s-=2; } }
-void fIndex() { PUSH(R0); }
 void fDotS() { for (int i=sb; i<=s; i++) { if (sb<i) { putC(32); } printStringF("%ld", st.i[i]); } }
 void fType() { y = (char*)&stb[POP]; fputs(y, stdout); }
 void fRand() {
@@ -212,22 +218,20 @@ void fRand() {
 void fExt() {
     u = stb[p++];
     if (u == '%') { NOS %= TOS; s--; } // MOD
-    else if (u == ']') { u = (R0 < R1) ? 1 : 0; R0 += POP; fLoopS(u); } // +LOOP
+    else if (u == ']') { u = (L0 < L1) ? 1 : 0; L0 += POP; fLoopS(u); } // +LOOP
     else if (u == 'R') { fRand(); }
     else if (u == 'L') { fLoad(); } // ABS
     else if (u == 'Y') { TOS = (long)&stb[TOS]; fSystem(); } // system
     else if (u == 'T') { PUSH(timerMS()); } // TIMER/MILLIS
     else if (u == 'N') { PUSH(timerNS()); } // TIMER/MICROS
-    else if (u == 'U') { r += 3; } // UNLOOP
+    else if (u == 'U') { lsp += 3; } // UNLOOP
     else if (u == 'W') { printStringF("-wait:%ld-", POP); } // WAIT
     else if (u == 'X') { init(0); p = 0; } // Reset
     else if (u == 'Q') { exit(0); } // Exit s3
 }
 void fUser() { p = doUser(u, p); }
 void fZType() { TOS = (long)&stb[TOS]; dotQ(0); }
-void fBegin() { r -= 3; R0 = p; }
 void fQt() { while (stb[p] != '|') { stb[TOS++] = stb[p++]; } stb[TOS++] = 0; ++p; }
-void fWhile() { if (POP) { p = R0; } else { r += 3; } }
 void fLNot() { TOS = (TOS) ? 0 : -1; }
 
 void (*jmpTbl[128])() = {
@@ -239,7 +243,7 @@ void (*jmpTbl[128])() = {
     fSys,fAbs,fBit,fCOp,fRegDec,fExec,fFloat,fGoto,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,  //  96:111
     X,fDotS,fRegGet,fRegSet,fType,fUser,X,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };  // 112:127
 
-void Run(int x) { s=(s<sb)?(sb-1):s; r=rb; p=x; while (p) { u=stb[p++]; jmpTbl[u](); } }
+void Run(int x) { s=(s<sb)?(sb-1):s; r=rb; lsp=0; p=x; while (p) { u=stb[p++]; jmpTbl[u](); } }
 #ifdef __PC__
 void Hist(char *s) { FILE *fp = fopen("h.txt", "at"); if (fp) { fprintf(fp, "%s", s); fclose(fp); } }
 void Loop() {

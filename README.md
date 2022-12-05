@@ -157,35 +157,36 @@ fT    (a--n)      n: TANH(a)
 
 
 *** MEMORY ***
-        NOTES: - There are 3 memory areas in s3: CELL, CODE, and ABSOLUTE
+        NOTES: - There are 3 memory areas in s3: CELL, CODE, and ABSOLUTE.
                - An address in CELL memory is an index into an array of LONGS.
                - An address in BYTE memory is an index into an array of BYTES.
                - An address in ABSOLUTE memory is an address in the system's memory.
                - BYTE memory is used for CODE as well. Code starts at address 1.
                - To get the last allocated CODE address, use 0@.
-@     (a--n)      Fetch CELL n from CELL address a
-!     (n a--)     Store CELL n to CELL address a
-c@    (a--b)      Fetch BYTE b from BYTE address a
-c!    (b a--)     Store BYTE b to BYTE address a
-w@    (a--w)      Fetch WORD w from BYTE address a
-w!    (w a--)     Store WORD w to BYTE address a
-m@    (a--b)      Fetch BYTE b from ABSOLUTE address a
-m!    (b a--)     Store BYTE b to ABSOLUTE address a
+@     (a--n)      Fetch CELL n from CELL address a.
+!     (n a--)     Store CELL n to CELL address a.
+c@    (a--b)      Fetch BYTE b from BYTE address a.
+c!    (b a--)     Store BYTE b to BYTE address a.
+w@    (a--w)      Fetch WORD w from BYTE address a.
+w!    (w a--)     Store WORD w to BYTE address a.
+m@    (a--b)      Fetch BYTE b from ABSOLUTE address a.
+m!    (b a--)     Store BYTE b to ABSOLUTE address a.
 
 
 *** REGISTERS and LOCALS ***
         NOTES: - s3 allocates 10 locals at a time, [r0..r9].
-               - Register names are 1 UPPERCASE character: [A..Z]
-l+    (--)        Allocate 10 locals, [r0..r9]
-r3    (--n)       n: value of local #3
-s3    (n--)       n: value to store in local #3
-i3    (--)        Increment local #3
-d3    (--)        Decrement local #3
+               - Register names are 1 UPPERCASE character: [A..Z].
+               - Registers are stored in CELL addresses 65-91 (rA='A@, rZ='Z@).
+l+    (--)        Allocate 10 locals, [r0..r9].
+r3    (--n)       n: value of local #3.
+s3    (n--)       n: value to store in local #3.
+i3    (--)        Increment local #3.
+d3    (--)        Decrement local #3.
 l-    (--)        De-allocate the current set of locals.
-rC    (--n)       n: value of register C
-sC    (n--)       n: value to store in register C
-iC    (--)        Increment register C
-dC    (--)        Decrement register C
+rC    (--n)       n: value of register C.
+sC    (n--)       n: value to store in register C.
+iC    (--)        Increment register C.
+dC    (--)        Decrement register C.
 
 
 *** WORDS/FUNCTIONS ***
@@ -197,7 +198,7 @@ ABCD  (--)        Execute/call word ABCD.
 ;     (--)        End of word definition. Exits word at run-time.
 ^     (--)        Exit word immediately.
         NOTE: To exit a word while inside of a loop, use 'xU^'.
-              example: :LOOPTEST 100 0[n.b n32=("-out" xU^)", "];
+              example: :LOOPTEST 100 0[n.b n71=("-out" xU^)", "];
 ?ABCD (--A H)     A: BYTE address of ABCD (0 if not defined), H: hash for "ABCD".
 
 
@@ -205,7 +206,7 @@ ABCD  (--)        Execute/call word ABCD.
 NNN    (--n)      Scan DECIMAL number. For multiple numbers, separate them by space (47 33).
         NOTEs: (1) To enter a negative number, use "negate" (eg - 490_).
                (2) To enter a float, end with 'e' (eg - 1234e).
-'x     (--n)      n: the ASCII value of x
+'x     (--n)      n: the ASCII value of x.
 hXXX   (--h)      Scan XXX as a HEX number (0-9, A-F, a-f).
 .      (N--)      Output N as decimal number.
 f.     (F--)      Output F as floating point number.
@@ -222,7 +223,7 @@ b      (--)       Output a single SPACE.
            - %x outputs TOS as a hex number (A-F are lowercase)
            - %<x> outputs <x> (eg - %% outputs %)
 `dir`  (--)       Calls system("dir").
-xY     (A--)     Sends string at BYTE address A to system() (example: 1000#|ls|\xY).
+xY     (A--)      Sends string at BYTE address A to system() (example: 1000#|ls|\xY).
 |XXX|  (a--b)     Copies XXX to BYTE address a, b is the next address after the NULL terminator.
 z      (a--)      ZTYPE: Output the formatted string at BYTE address a (see ").
 t      (a--)      TYPE: Output the string at BYTE address a (faster, no formatting).

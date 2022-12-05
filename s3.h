@@ -23,6 +23,7 @@
     #define VARS_SZ        (64*1024)
     #define FILE_SZ             10
     #define LOCS_SZ             90
+    #define LOOP_SZ             30
     #define MAX_FN          0x0FFF
 #else // DEV BOARD
     // TEENSY4 likes these: 64k/64k/10/0x0FFF
@@ -32,6 +33,7 @@
     #define VARS_SZ        (32*1024)
     #define FILE_SZ             10
     #define LOCS_SZ             90
+    #define LOOP_SZ             30
     #define MAX_FN          0x07FF
 #endif
 
