@@ -131,8 +131,8 @@ void loadCode(const char* src) {
 // ********************************************
 
 void loadBaseSystem() {
-  loadCode(":Code 0@1[nc@#58=(n1-c@59=(13,10,),];");
-  loadCode(":Mil 1000**;");
+  loadCode(":CODE 0@1[nc@#58=(n1-c@59=(13,10,),];");
+  loadCode(":MIL 1000**;");
 }
 
 void s3() {
