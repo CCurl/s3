@@ -55,18 +55,18 @@ Many interpreted environments have a large SWITCH statement with cases in a loop
     Forth equivalent: C @ IF ."Yes" ELSE ."No" THEN
     C equivalent:     if (C) { printf("Yes") } else { printf("No") }
 
-; A simple benchmark for a 100 million FOR loop:
-    :Mil 1000 # * *;
-    :Bench 0(n--) xT $ 0[] xT $ -;
-    100 Mil Bench . "usec"
+; A simple benchmark for a 100 million FOR/NEXT (aka - DO/LOOP) loop:
+    :MIL 1000 # * *;
+    :BENCH 0(n--) xT $ 0[] xT $ -;
+    100 Mil BENCH . "usec"
 
 ; A simple benchmark for a 100 million WHILE loop:
-    :Mil 1000#**;
-    :Bench 0(n--) xT${d#}\xT$-." usec";
-    100 Mil Bench ." usec" 0(note that spaces are optional)
+    :MIL 1000#**;
+    :BENCH 0(n--) xT${d#}\xT$-." usec";
+    100 Mil BENCH ." usec" 0(note that spaces are optional)
 
 ; Define a word to display the currently defined code:
-    :Code 0(--) 0@1[nc@#58=(n1-c@59=(13,10,),];
+    :CODE 0(--) 0@1[nc@#58=(n1-c@59=(13,10,),];
 
 ; x = (a == b) ? c : d;
     s3 code:          rA rB=#(rC$)~(rD)sX;
@@ -78,8 +78,8 @@ Many interpreted environments have a large SWITCH statement with cases in a loop
     Forth equivalent:    OVER OVER > IF SWAP THEN
     C equivalent:        if (f > t) { int x = f; f = t; t = x; }
 
-; To do something N times (in this case, execute Sub):
-    S3 code:             rN 0[Sub]
+; To do something N times (in this case, execute SUB):
+    S3 code:             rN 0[SUB]
     Forth equivalent:    N @ 0 DO Sub LOOP
     C equivalent:        for (int i=0; i<N; i++) { Sub() }
 
@@ -94,18 +94,18 @@ Many interpreted environments have a large SWITCH statement with cases in a loop
     C equivalent:        for (int i = F; i < T; i++)) { printf("%d ", i); }
 
 ; One way to copy N bytes from A to B (n f t--)
-    :Copy 0(f t n--) l+ s3 s2 s1 r3 0[r1 c@ r2 c! i1 i2] l-;
+    :COPY 0(f t n--) l+ s3 s2 s1 r3 0[r1 c@ r2 c! i1 i2] l-;
     rA rB rN Copy
 
 ; Creating a jump-table using anonymous words
-    :JumpTable 10000;
-    :JtSet  0(a b--) JumpTable+!;
-    :JtGet  0(a b--) JumpTable+@;
-    :JtExec 0(--n)   JtGet e;
-    :_"-this is A-"; 'A JtSet
-    :_"-this is B-"; 'B JtSet
-    'A JtExec
-    'B JtExec
+    :JUMPTABLE 10000;
+    :JTSET  0(a b--) JUMPTABLE+!;
+    :JTGET  0(a b--) JUMPTABLE+@;
+    :JTEXEC 0(--n)   JTGET e;
+    :_"-this is A-"; 'A JTSET
+    :_"-this is B-"; 'B JTSET
+    'A JTEXEC
+    'B JTEXEC
 
 ; Exit S3:
     xQ
@@ -118,7 +118,7 @@ Many interpreted environments have a large SWITCH statement with cases in a loop
 -   (a b--n)      n: a-b - subtraction
 *   (a b--n)      n: a*b - multiplication
 /   (a b--q)      q: a/b - division
-^   (a b--r)      r: MODULO(a, b)
+x%  (a b--r)      r: MODULO(a, b)
 &   (a b--q r)    q: DIV(a,b), r: MODULO(a,b) - /MOD
 
 
@@ -182,17 +182,17 @@ iC    (--)        Increment register C
 dC    (--)        Decrement register C
 
 
-*** WORDS ***
-        NOTES: Word names are variable-length alphanumeric and start with a Capital letter.
+*** WORDS/FUNCTIONS ***
+        NOTES: Word names are variable-length UPPERCASE words.
                Word "_" is the NONAME word (can be used to create jump-tables).
-:Abc3 (--)        Define word Abc. Skip until next ';'.
+:ABCD (--)        Define word ABCD. Skip until next ';'.
 :_    (--A)       Define an anonymous word. A: current HERE. Skip until next ';'.
-Abc3  (--)        Execute/call word Abc3.
+ABCD  (--)        Execute/call word ABCD.
 ;     (--)        End of word definition. Exits word at run-time.
 ^     (--)        Exit word immediately.
         NOTE: To exit a word while inside of a loop, use 'xU^'.
-              example: :LoopTest 100 0[n.b n32=("-out" xU^)", "];
-?Abc3 (--A H)     A: address of Abc3 (0 if not defined), H: hash for "Abc3".
+              example: :LOOPTEST 100 0[n.b n32=("-out" xU^)", "];
+?ABCD (--A H)     A: address of ABCD (0 if not defined), H: hash for "ABCD".
 
 
 *** INPUT/OUTPUT ***
@@ -229,13 +229,13 @@ k@     (--c)      TODO: c: next character from the input buffer. If no character
 =     (a b--f)    f: (a = b) ? 1 : 0;
 >     (a b--f)    f: (a > b) ? 1 : 0;
 ~     (n -- f)    f: (a = 0) ? 1 : 0; (Logical NOT)
-[     (T F--)     FOR: start a FOR/NEXT loop.
-n     (--n)       n: the index of the current FOR loop
-]     (--)        NEXT: increment index (n) and stop if (T<=n)
-x]    (N--)       +NEXT: Add N to the index (n) and stop if (n==T) or (n crosses T)
+[     (T F--)     DO: start a DO/LOOP (aka-FOR/NEXT) loop.
+n     (--n)       n: the index of the current DO loop
+]     (--)        LOOP: increment index (n) and stop if (T<=n)
+x]    (N--)       +LOOP: Add N to the index (n) and stop if (n==T) or (n crosses T)
 {     (--)        BEGIN While loop
 }     (f--)       WHILE: if (f != 0) jump back to BEGIN, else continue
-xU    (--)        UNLOOP: Unwind the LOOP stack (either FOR or WHILE loops)
+xU    (--)        UNLOOP: Unwind the LOOP stack (either DO or WHILE loops)
 (     (f--)       IF: if (f == 0), skip to next ')'.
 
 

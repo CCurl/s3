@@ -17,10 +17,8 @@ void init(int files) {
     st.i[0] = h;
 }
 int funcN(int x) {
-    unsigned long hh = 5381;
-    while (btw(stb[x], 'A', 'Z') || btw(stb[x], 'a', 'z') || (btw(stb[x], '0', '9'))) {
-        hh = ((hh << 4) ^ hh) + (stb[x++] - 'A');
-    }
+    unsigned long hh = stb[x++];
+    while (btw(stb[x], 'A', 'Z')) { hh = (hh*33) + stb[x++]; }
     fn = (hh & MAX_FN); fa = funcs[fn];
     return x;
 }
@@ -107,10 +105,10 @@ void doExec(long addr) {
 void fGoto() { p = POP; }
 void fExec() { doExec(POP); }
 void AZ() { p = funcN(p - 1); doExec(fa); }
-void fDo() { r -= 3; st.i[r + 2] = p; st.i[r] = POP; st.i[r + 1] = POP; }
+void fDo() { r -= 3; R2 = p; R0 = POP; R1 = POP; }
 void fLoopS(int x) {
-    if ((x==1) && (R0 < R1)) { p = R2; return; }
     if ((x==0) && (R0 > R1)) { p = R2; return; }
+    if ((x==1) && (R0 < R1)) { p = R2; return; }
     r += 3;
 }
 void fLoop() { if (++R0 < R1) { p = R2; } else { r += 3; } }

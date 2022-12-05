@@ -1,38 +1,39 @@
 xX 0(reset s3)
 :CR "%n";
-:Code 0@1[nc@#58=(n1-c@59=(13,10,),];
+:CODE 0@1[nc@#58=(n1-c@59=(13,10,),];
 :YN #("y")~("n");
-:Regs 'Z1+'A[n@(n@n"%n%c: %d")];
-:HelloWorld "hello world!";
-:Locs s3 s4 i3 d4 r3 r4 + "locals: %d";
-:Ver "s3 v0.0.1";
-:Bench xT$ 0[] Elapsed;
-:Elapsed xT$-." usecs";
-:Mil 1000#**;
-:Benches 0 [# Mil Bench CR ]\;
-:ULTestD "UnloopTest-DO: " 100 1[n .b n 23=("-out"xU^)] "ERROR!";
-:ULTestW "UnloopTest-WHILE: " 100{# 73=("-out"\xU^)# .b 1-#} "ERROR!";
-:MultiLine
-"Here"
+:REGS 'Z'A[n@(n@n"%n%c: %d")];
+:HELLOWORLD "hello world!";
+:LOCS s3 s4 i3 d4 r3 r4 + "locals: %d";
+:VER "s3 v0.0.1";
+:BENCH xT$ 0[] ELAPSED;
+:BENCHW xT$ {d#}\ ELAPSED;
+:ELAPSED xT$-." usecs";
+:MIL 1000#**;
+:BENCHES 0 [# MIL BENCH CR]\;
+:ULTESTD "UnloopTest-DO: " 100 1[n .b n 23=("-out"xU^)] "ERROR!";
+:ULTESTW "UnloopTest-WHILE: " 100{# .b #73=("-out"\xU^) 1-#} "ERROR!";
+:MULTI "This"
 " is a multiline"
 " function";
-:JumpTable 10000;
-:JtSet  0(a b--) JumpTable+!;
-:JtGet  0(a b--) JumpTable+@;
-:JtExec 0(--n)   JtGet e;
-:_"-anonynous A-"; 'A JtSet
-:_"-anonynous B-"; 'B JtSet
-:Reload 1000#|tests|\xL;
-Ver
+:JMPTBL 10000;
+:JTSET  0(a n--) JMPTBL+!;
+:JTGET  0(n--a)  JMPTBL+@;
+:JTEXEC 0(n--)   JTGET e;
+:_"-anonynous A-"; 'A JTSET
+:_"-anonynous B-"; 'B JTSET
+:RELOAD 1000#|src.s3|\xL;
+VER
 123 sA 44567 sZ
-CR Regs
-CR HelloWorld
+CR REGS
+CR HELLOWORLD
 CR 1 YN 0 YN
-CR 111 222 Locs
-CR 50 Mil Bench
-CR ULTestD "-back"
-CR ULTestW "-back"
-CR MultiLine
-CR 'A JtExec 'B JtExec
-CR CR Code CR
+CR 111 222 LOCS
+CR "DO-BENCH " 50 MIL BENCH
+CR "WHILE-BENCH " 50 MIL BENCHW
+CR ULTESTD "-back"
+CR ULTESTW "-back"
+CR MULTI
+CR 'A JTEXEC 'B JTEXEC
+CR CR CODE CR
 0(xQ)
