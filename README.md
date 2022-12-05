@@ -58,12 +58,12 @@ Many interpreted environments have a large SWITCH statement with cases in a loop
 ; A simple benchmark for a 100 million FOR/NEXT (aka - DO/LOOP) loop:
     :MIL 1000 # * *;
     :BENCH 0(n--) xT $ 0[] xT $ -;
-    100 Mil BENCH . "usec"
+    100 MIL BENCH . "usec"
 
 ; A simple benchmark for a 100 million WHILE loop:
     :MIL 1000#**;
     :BENCH 0(n--) xT${d#}\xT$-." usec";
-    100 Mil BENCH ." usec" 0(note that spaces are optional)
+    100 MIL BENCH ." usec" 0(note that spaces are optional)
 
 ; Define a word to display the currently defined code:
     :CODE 0(--) 0@1[nc@#58=(n1-c@59=(13,10,),];
@@ -157,12 +157,18 @@ fT    (a--n)      n: TANH(a)
 
 
 *** MEMORY ***
+        NOTES: - There are 3 memory areas in s3: CELL, CODE, and ABSOLUTE
+               - An address in CELL memory is an index into an array of LONGS.
+               - An address in BYTE memory is an index into an array of BYTES.
+               - An address in ABSOLUTE memory is an address in the system's memory.
+               - BYTE memory is used for CODE as well. Code starts at address 1.
+               - To get the last allocated CODE address, use 0@.
 @     (a--n)      Fetch CELL n from CELL address a
 !     (n a--)     Store CELL n to CELL address a
-c@    (a--b)      Fetch BYTE b from CODE address a
-c!    (b a--)     Store BYTE b to CODE address a
-w@    (a--w)      Fetch WORD w from CODE address a
-w!    (w a--)     Store WORD w to CODE address a
+c@    (a--b)      Fetch BYTE b from BYTE address a
+c!    (b a--)     Store BYTE b to BYTE address a
+w@    (a--w)      Fetch WORD w from BYTE address a
+w!    (w a--)     Store WORD w to BYTE address a
 m@    (a--b)      Fetch BYTE b from ABSOLUTE address a
 m!    (b a--)     Store BYTE b to ABSOLUTE address a
 
@@ -192,7 +198,7 @@ ABCD  (--)        Execute/call word ABCD.
 ^     (--)        Exit word immediately.
         NOTE: To exit a word while inside of a loop, use 'xU^'.
               example: :LOOPTEST 100 0[n.b n32=("-out" xU^)", "];
-?ABCD (--A H)     A: address of ABCD (0 if not defined), H: hash for "ABCD".
+?ABCD (--A H)     A: BYTE address of ABCD (0 if not defined), H: hash for "ABCD".
 
 
 *** INPUT/OUTPUT ***
@@ -215,11 +221,11 @@ b      (--)       Output a single SPACE.
            - %X outputs TOS as a hex number (A-F are uppercase)
            - %x outputs TOS as a hex number (A-F are lowercase)
            - %<x> outputs <x> (eg - %% outputs %)
-`XXX`  (--)       Calls system("XXX").
-xY     (a--)      Calls system(a).
-|XXX|  (a--b)     Copies XXX to address a, b is the next address after the NULL terminator.
-z      (a--)      ZTYPE: Output the formatted string at address a (see ").
-t      (a--)      TYPE: Output the string at address a (no formatting).
+`dir`  (--)       Calls system("dir").
+xY     (A--)     Sends string at BYTE address A to system() (example: 1000#|ls|\xY).
+|XXX|  (a--b)     Copies XXX to BYTE address a, b is the next address after the NULL terminator.
+z      (a--)      ZTYPE: Output the formatted string at BYTE address a (see ").
+t      (a--)      TYPE: Output the string at BYTE address a (faster, no formatting).
 k?     (--f)      TODO: f: 1 if a character is waiting in the input buffer, else 0.
 k@     (--c)      TODO: c: next character from the input buffer. If no character, wait.
 
@@ -235,12 +241,12 @@ n     (--n)       n: the index of the current DO loop
 x]    (N--)       +LOOP: Add N to the index (n) and stop if (n==T) or (n crosses T)
 {     (--)        BEGIN While loop
 }     (f--)       WHILE: if (f != 0) jump back to BEGIN, else continue
-xU    (--)        UNLOOP: Unwind the LOOP stack (either DO or WHILE loops)
+xU    (--)        UNLOOP: Unwind the LOOP stack (either DO or WHILE loops, use with '^')
 (     (f--)       IF: if (f == 0), skip to next ')'.
 
 
 *** FILES ***
-fO    (a m--h)    Open: a=filename, m=mode (0=read, else write), h=handle
+fO    (a m--h)    Open: a=filename, m=mode (0=read, else write), h=handle (eg- 1000#|filename|\0fO)
 fC    (h--)       Close: h=handle
 fR    (h--c n)    Read: h=handle, c=char, n=0 if error/eof, else 1
 fW    (c h--)     Write: h=handle, c=char
@@ -260,7 +266,6 @@ xT    (--n)       Milliseconds (Arduino: millis(), Windows/Linux: clock())
 xN    (--n)       Microseconds (Arduino: micros(), Windows/Linux: clock())
 xW    (n--)       TODO: Wait (Arduino: delay(),  Windows: Sleep())
 0@    (--n)       Value of HERE variable
-xY    (A--)       Sends string at A to system() (example: 1000#|ls|\xY).
 xX    (--)        s3 system reset/clear.
 xQ    (--)        PC: Exit s3
 ```
