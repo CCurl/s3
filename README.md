@@ -48,7 +48,7 @@ Many interpreted environments have a large SWITCH statement with cases in a loop
 ## Some s3 examples
 ```
 ; To enter a comment: 
-    0( here is a comment )
+    0(here is a comment)
   
 ; If/Else
     s3 code:          rC #("Yes")~("No")
@@ -99,9 +99,9 @@ Many interpreted environments have a large SWITCH statement with cases in a loop
 
 ; Creating a jump-table using anonymous words
     :JUMPTABLE 10000;
-    :JTSET  0(a b--) JUMPTABLE+!;
-    :JTGET  0(a b--) JUMPTABLE+@;
-    :JTEXEC 0(--n)   JTGET e;
+    :JTSET  0(a n--) JUMPTABLE+!;
+    :JTGET  0(n--a)  JUMPTABLE+@;
+    :JTEXEC 0(n--)   JTGET e;
     :_"-this is A-"; 'A JTSET
     :_"-this is B-"; 'B JTSET
     'A JTEXEC
