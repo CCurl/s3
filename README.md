@@ -50,6 +50,21 @@ Many interpreted environments have a large SWITCH statement with cases in a loop
 ; To enter a comment: 
     0(here is a comment)
   
+; Hello World example
+    "Hello World!"
+    
+; Print numbers from 1 to 100
+    :NUMS 101 1[n . b]; NUMS
+    0(or) 101 1[n.b]
+    0(or) 1{#.b1+#101<}\
+ 
+; Print numbers from 100 to 1
+    100 {# . b 1 - #} \
+    0(or) 0 100[n.b1_x]
+ 
+; Print the ASCII table
+    127 32[n#"%d: [%c]%n"]
+ 
 ; If/Else
     s3 code:          rC #("Yes")~("No")
     Forth equivalent: C @ IF ."Yes" ELSE ."No" THEN
