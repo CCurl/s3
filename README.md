@@ -156,8 +156,11 @@ d  (x--y)         y: x-1                           (Decrement)
 
 
 *** FLOATING POINT ***
+123e  (--F)       F: 123 as a floating point number
+12.34 (--F)       F: 123.45
 ff    (n--F)      n: integer, F: float
 fi    (F--n)      F: float, n: integer
+f_    (F--N)      N: -F (Float-Negate)
 f.    (F--)       Output F
 f@    (a--F)      Fetch float F from address a
 f!    (F a--)     Store float F to address a
@@ -218,9 +221,11 @@ ABCD  (--)        Execute/call word ABCD.
 
 
 *** INPUT/OUTPUT ***
-NNN    (--n)      Scan DECIMAL number. For multiple numbers, separate them by space (47 33).
-        NOTEs: (1) To enter a negative number, use "negate" (eg - 490_).
-               (2) To enter a float, end with 'e' (eg - 1234e).
+NNN    (--n)      Scan decimal number. For multiple numbers, separate them by space (47 33).
+        NOTES: (1) To enter a negative number, use "negate" (eg - 490_).
+               (2) To enter a negative floating point number, use "Fnegate" (eg - 490.34f_).
+NNNe   (--F)      Scan floating point number (e.g. - 355e)
+NN.dd  (--F)      Scan floating point number (e.g. - 3.14159)
 'x     (--n)      n: the ASCII value of x.
 hXXX   (--h)      Scan XXX as a HEX number (0-9, A-F, a-f).
 .      (N--)      Output N as decimal number.
