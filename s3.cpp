@@ -5,26 +5,17 @@
 
 PROC_T proc[10], *curproc;
 BYTE mem[1024*1024];
-ST_T *st = (ST_T*)&mem[1024];
 static char *y;
 BYTE *stb;
-long *locs, lb, *lstk, lsp;
+long lb, lsp;
 long h, sb = 4, rb = 64, r, s, t, u, fpSp, memh = 0;
-long fn, fa, p, sd, fp, *funcs, fpStk[FILE_SZ];
-
-#define L0 lstk[lsp]
-#define L1 lstk[lsp-1]
-#define L2 lstk[lsp-2]
+long fn, fa, p, sd, fp, fpStk[FILE_SZ];
 
 BYTE *getMem(int num, int sz) { memh += num*sz; return &mem[memh-(num*sz)]; }
 void setProc(int n) {
     curproc = &proc[n];
-    st = &curproc->st;
     stb = curproc->stb;
-    locs = curproc->locs;
-    lstk = curproc->lstk;
-    funcs = curproc->funcs;
-    h = st->i[0];
+    h = STI(0);
 }
 void init(int files, int isz, int bsz, int n) {
     if (proc[n].stb == NULL) {
@@ -39,15 +30,15 @@ void init(int files, int isz, int bsz, int n) {
     setProc(n);
     s = sb - 1; h = 1; lb = lsp = 0;
     for (int i = 0; i < CODE_SZ; i++) { stb[i] = 0; }
-    for (int i = 0; i < VARS_SZ; i++) { st->i[i] = 0; }
-    for (int i = 0; i <= MAX_FN; i++) { funcs[i] = 0; }
+    for (int i = 0; i < VARS_SZ; i++) { STI(i) = 0; }
+    for (int i = 0; i <= MAX_FN; i++) { FUNCS(i) = 0; }
     if (files) { fpSp = 0; for (int i = 0; i < FILE_SZ; i++) { fpStk[i] = 0; } }
-    st->i[0] = h;
+    STI(0) = h;
 }
 int funcN(int x) {
     unsigned long hh = stb[x++];
     while (btw(stb[x], 'A', 'Z')) { hh = (hh*33) + stb[x++]; }
-    fn = (hh & MAX_FN); fa = funcs[fn];
+    fn = (hh & MAX_FN); fa = FUNCS(fn);
     return x;
 }
 void X() { if (u) { printStringF("-IR %ld (%c)?", u, (char)u); } p = 0; }
@@ -70,7 +61,7 @@ void dotQ(int delim) {
             if (c == 'd') { printStringF("%ld", POP); }
             else if (c == 'c') { putC((int)POP); }
             else if (c == 'e') { putC(27); }
-            else if (c == 'f') { printStringF("%g", st->f[s--]); }
+            else if (c == 'f') { printStringF("%g", STF(s--)); }
             else if (c == 'n') { putC(13); putC(10); }
             else if (c == 'q') { putC('"'); }
             else if (c == 's') { printString((char*)&stb[POP]); }
@@ -82,7 +73,7 @@ void dotQ(int delim) {
     }
     if (delim) { ++p; }
 }
-void fStore() { st->i[TOS] = NOS; s -= 2; }
+void fStore() { STI(TOS) = NOS; s -= 2; }
 void fDotQ() { dotQ('"'); }
 void fDup() { t = TOS; PUSH(t); }
 void fSwap() { t = TOS; TOS = NOS; NOS = t; }
@@ -100,11 +91,11 @@ void fDiv() { NOS /= TOS; s--; }
 void n09() {
     PUSH(u - '0');
     while (btw(stb[p],'0','9')) { TOS=(TOS*10)+stb[p++]-'0'; }
-    if (stb[p] == 'e') { ++p; st->f[s] = (float)TOS; }
+    if (stb[p] == 'e') { ++p; FTOS = (float)TOS; }
     else if (stb[p] == '.') { 
-        ++p; st->f[s] = (float)TOS;
+        ++p; FTOS = (float)TOS;
         float d = 10;
-        while (btw(stb[p],'0','9')) { st->f[s]+=(stb[p++]-'0')/d; d*=10; }
+        while (btw(stb[p],'0','9')) { FTOS+=(stb[p++]-'0')/d; d*=10; }
     }
 }
 void fCreate() {
@@ -112,7 +103,7 @@ void fCreate() {
     else { p = funcN(p); }
     if (u && fa) { printStringF("-redef:%ld to %ld,hash(%ld)-", fa, p, fn); }
     while (stb[p] == ' ') { ++p; }
-    if (u) { funcs[fn] = p; }
+    if (u) { FUNCS(fn) = p; }
     while (stb[p] != ';') {
         if (stb[p]) { if (stb[p]<32) { stb[p]=32; } ++p; }
         else {
@@ -120,17 +111,17 @@ void fCreate() {
             doFgets((char*)&stb[p], 128, fp);
         }
     }
-    if (h < (++p)) { h=p; st->i[0]=h; }
+    if (h < (++p)) { h=p; STI(0)=h; }
 }
-void fRet() { p = st->i[r++]; if (rb < r) { r = rb; p = 0; } }
+void fRet() { p = STI(r++); if (rb < r) { r = rb; p = 0; } }
 void fLT() { NOS = (NOS < TOS) ? -1 : 0; s--; }
 void fEq() { NOS = (NOS == TOS) ? -1 : 0; s--; }
 void fGT() { NOS = (NOS > TOS) ? -1 : 0; s--; }
 void fLookup() { p = funcN(p); PUSH(fa); PUSH(fn); }
-void fFetch() { TOS = st->i[TOS]; }
+void fFetch() { TOS = STI(TOS); }
 void doExec(long addr) {
     if (!addr) { printString("-noimpl-"); return; }
-    if ((stb[p] != ';') && (stb[p] != '^')) { st->i[--r] = p; }
+    if ((stb[p] != ';') && (stb[p] != '^')) { STI(--r) = p; }
     p = addr;
 }
 void fGoto() { p = POP; }
@@ -146,7 +137,7 @@ void fLoop() { if (++L0 < L1) { p = L2; } else { lsp -= 3; } }
 void fBegin() { lsp += 3; L0 = p; }
 void fWhile() { if (POP) { p = L0; } else { lsp -= 3; } }
 void fIndex() { PUSH(L0); }
-void fLeave() { p = st->i[r++]; }
+void fLeave() { p = STI(r++); }
 void fNeg() { TOS = -TOS; }
 void fSys() {
     int c = CODE_SZ - 100; t = c;
@@ -169,8 +160,8 @@ void fCOp() {
 void fROp() {
     u = stb[p++];
     if (u == '@') { PUSH(R0); }
-    else if (u == '<') { st->i[--r]=POP; }
-    else if (u == '>') { PUSH(st->i[r++]); }
+    else if (u == '<') { STI(--r)=POP; }
+    else if (u == '>') { PUSH(STI(r++)); }
 }
 void fWord() {
     u = stb[p++];
@@ -179,20 +170,20 @@ void fWord() {
 }
 void fFloat() {
     u = stb[p++];
-    if (u == '.') { printStringF("%g", st->f[s--]); }
-    else if (u == '@') { st->f[s] = st->f[TOS]; }
-    else if (u == '!') { st->f[TOS] = st->f[s - 1]; s -= 2; }
-    else if (u == '+') { st->f[s - 1] += st->f[s]; s--; }
-    else if (u == '-') { st->f[s - 1] -= st->f[s]; s--; }
-    else if (u == '*') { st->f[s - 1] *= st->f[s]; s--; }
-    else if (u == '/') { st->f[s - 1] /= st->f[s]; s--; }
-    else if (u == '_') { st->f[s] = -st->f[s]; }
-    else if (u == '<') { TOS = (st->f[s - 1] < st->f[s]) ? -1 : 0; }
-    else if (u == '>') { TOS = (st->f[s - 1] > st->f[s]) ? -1 : 0; }
-    else if (u == 'i') { TOS = (int)st->f[s]; }
-    else if (u == 'f') { st->f[s] = (float)TOS; }
-    else if (u == 'S') { st->f[s] = (float)sqrt(st->f[s]); }
-    else if (u == 'T') { st->f[s] = (float)tanh(st->f[s]); }
+    if (u == '.') { printStringF("%g", STF(s--)); }
+    else if (u == '@') { STF(s) = STF(TOS); }
+    else if (u == '!') { FTOS = FNOS; s -= 2; }
+    else if (u == '+') { FNOS += FTOS; s--; }
+    else if (u == '-') { FNOS -= FTOS; s--; }
+    else if (u == '*') { FNOS *= FTOS; s--; }
+    else if (u == '/') { FNOS /= FTOS; s--; }
+    else if (u == '_') { FTOS = -FTOS; }
+    else if (u == '<') { TOS = (FNOS < FTOS) ? -1 : 0; }
+    else if (u == '>') { TOS = (FNOS > FTOS) ? -1 : 0; }
+    else if (u == 'i') { TOS = (int)FTOS; }
+    else if (u == 'f') { FTOS = (float)TOS; }
+    else if (u == 'S') { FTOS = (float)sqrt(FTOS); }
+    else if (u == 'T') { FTOS = (float)tanh(FTOS); }
     else if (u == 'O') { fOpen(); }
     else if (u == 'C') { fClose(); }
     else if (u == 'R') {
@@ -216,32 +207,32 @@ void fLoc() {
 }
 void fRegDec() {
     u = stb[p++];
-    if (btw(u, 'A', 'Z')) { st->i[u]--; }
-    else if (btw(u, '0', '9')) { locs[lb + u - '0']--; }
+    if (btw(u, 'A', 'Z')) { STI(u)--; }
+    else if (btw(u, '0', '9')) { LOCS(lb+u-'0')--; }
     else { --p; --TOS; }
 }
 void fRegInc() {
     u = stb[p++];
-    if (btw(u, 'A', 'Z')) { st->i[u]++; }
-    else if (btw(u, '0', '9')) { locs[lb + u - '0']++; }
+    if (btw(u, 'A', 'Z')) { STI(u)++; }
+    else if (btw(u, '0', '9')) { LOCS(lb+u-'0')++; }
     else { --p; ++TOS; }
 }
 void fRegGet() {
     u = stb[p++]; PUSH(0);
-    if (btw(u, 'A', 'Z')) { TOS = st->i[u]; }
-    else if (btw(u, '0', '9')) { TOS = locs[lb + u - '0']; }
+    if (btw(u, 'A', 'Z')) { TOS = STI(u); }
+    else if (btw(u, '0', '9')) { TOS = LOCS(lb+u-'0'); }
 }
 void fRegSet() {
     u = stb[p++]; t = POP;
-    if (btw(u, 'A', 'Z')) { st->i[u] = t; }
-    else if (btw(u, '0', '9')) { locs[lb + u - '0'] = t; }
+    if (btw(u, 'A', 'Z')) { STI(u) = t; }
+    else if (btw(u, '0', '9')) { LOCS(lb+u-'0')=t; }
 }
 void fKey() {
     u = stb[p++]; if (u == '?') { PUSH(0); /*TODO!*/ }
     else if (u == '@') { PUSH(getC()); }
 }
 void fMOp() { u = stb[p++]; if (u == '@') { TOS = *(char*)TOS; } } // else if (u=='!') { *(char*)TOS=(char)NOS; s-=2; } }
-void fDotS() { putC('('); for (int i=sb; i<=s; i++) { if (sb<i) { putC(32); } printStringF("%ld", st->i[i]); } putC(')'); }
+void fDotS() { putC('('); for (int i=sb; i<=s; i++) { if (sb<i) { putC(32); } printStringF("%ld", STI(i)); } putC(')'); }
 void fType() { y = (char*)&stb[POP]; fputs(y, stdout); }
 void fRand() {
     if (!sd) { sd = (long)(y)+timerMS(); }
@@ -310,12 +301,12 @@ void Loop() {
 }
 int main(int argc, char* argv[]) {
     init(1, VARS_SZ, CODE_SZ, 0);
-    st->i[lb] = argc;
+    STI(lb) = argc;
     u = 1000;
     for (int i = 1; i < argc; ++i) {
         y = argv[i]; t = atoi(y);
-        if ((t) || (y[0] == '0' && y[1] == 0)) { st->i[lb + i] = t; }
-        else { st->i[lb + i] = u; for (int j = 0; y[j]; j++) { stb[u++] = y[j]; } stb[u++] = 0; }
+        if ((t) || (y[0] == '0' && y[1] == 0)) { STI(lb+i) = t; }
+        else { STI(lb+i) = u; for (int j = 0; y[j]; j++) { stb[u++] = y[j]; } stb[u++] = 0; }
     }
     if ((argc > 1) && (argv[1][0] != '-')) { fp = doFopen(argv[1], 0); }
     if (!fp) { fp = doFopen("src.s3", 0); }

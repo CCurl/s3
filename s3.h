@@ -2,13 +2,22 @@
 #define __s3_h__
 
 #define btw(a,b,c) ((b<=a) && (a<=c))
-#define TOS      st->i[s]
-#define NOS      st->i[s-1]
-#define PUSH(x)  st->i[++s]=(long)(x)
-#define POP      st->i[s--]
-#define R0       st->i[r]
-#define R1       st->i[r+1]
-#define R2       st->i[r+2]
+#define STI(w)   curproc->st.i[w]
+#define STF(w)   curproc->st.f[w]
+#define TOS      STI(s)
+#define NOS      STI(s-1)
+#define FTOS     STF(s)
+#define FNOS     STF(s-1)
+#define PUSH(x)  STI(++s)=(long)(x)
+#define POP      STI(s--)
+#define R0       STI(r)
+#define R1       STI(r+1)
+#define R2       STI(r+2)
+#define L0       curproc->lstk[lsp]
+#define L1       curproc->lstk[lsp-1]
+#define L2       curproc->lstk[lsp-2]
+#define FUNCS(n) curproc->funcs[n]
+#define LOCS(n)  curproc->locs[(n)]
 
 #ifdef _WIN32
     #define __PC__

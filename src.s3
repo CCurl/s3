@@ -16,7 +16,7 @@ xX 0(reset s3)
 :MULTI "This"
 " is a multiline"
 " function";
-:JMPTBL 10000;
+:JMPTBL 1000;
 :JTSET  0(a n--) JMPTBL+!;
 :JTGET  0(n--a)  JMPTBL+@;
 :JTEXEC 0(n--)   JTGETq<;
