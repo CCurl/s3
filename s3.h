@@ -2,13 +2,13 @@
 #define __s3_h__
 
 #define btw(a,b,c) ((b<=a) && (a<=c))
-#define TOS      st.i[s]
-#define NOS      st.i[s-1]
-#define PUSH(x)  st.i[++s]=(long)(x)
-#define POP      st.i[s--]
-#define R0       st.i[r]
-#define R1       st.i[r+1]
-#define R2       st.i[r+2]
+#define TOS      st->i[s]
+#define NOS      st->i[s-1]
+#define PUSH(x)  st->i[++s]=(long)(x)
+#define POP      st->i[s--]
+#define R0       st->i[r]
+#define R1       st->i[r+1]
+#define R2       st->i[r+2]
 
 #ifdef _WIN32
     #define __PC__
@@ -38,7 +38,13 @@
 #endif
 
 typedef unsigned char BYTE;
-typedef union { float f[VARS_SZ]; long i[VARS_SZ]; } ST_T;
+typedef union { float *f; long *i; } ST_T;
+typedef struct {
+    int no;
+    ST_T st;
+    BYTE *stb;
+    long *locs, *lstk, *funcs;
+} PROC_T;
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,7 +91,7 @@ typedef union { float f[VARS_SZ]; long i[VARS_SZ]; } ST_T;
 
     extern BYTE stb[];
     extern long s, h;
-    extern ST_T st;
+    extern ST_T *st;
 #endif // __PC__
 
 #endif // __s3_h__

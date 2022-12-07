@@ -3,24 +3,46 @@
 #include "s3.h"
 // #define __DEBUG__
 
-ST_T st;
+PROC_T proc[10], *curproc;
+BYTE mem[1024*1024];
+ST_T *st = (ST_T*)&mem[1024];
 static char *y;
-BYTE stb[CODE_SZ];
-long locs[LOCS_SZ+10], lb, lstk[LOOP_SZ+1], lsp;
-long h, sb = 4, rb = 64, r, s, t, u, fpSp;
-long fn, fa, p, sd, fp, funcs[MAX_FN+1], fpStk[FILE_SZ];
+BYTE *stb;
+long *locs, lb, *lstk, lsp;
+long h, sb = 4, rb = 64, r, s, t, u, fpSp, memh = 0;
+long fn, fa, p, sd, fp, *funcs, fpStk[FILE_SZ];
 
 #define L0 lstk[lsp]
 #define L1 lstk[lsp-1]
 #define L2 lstk[lsp-2]
 
-void init(int files) {
+BYTE *getMem(int num, int sz) { memh += num*sz; return &mem[memh-(num*sz)]; }
+void setProc(int n) {
+    curproc = &proc[n];
+    st = &curproc->st;
+    stb = curproc->stb;
+    locs = curproc->locs;
+    lstk = curproc->lstk;
+    funcs = curproc->funcs;
+    h = st->i[0];
+}
+void init(int files, int isz, int bsz, int n) {
+    if (proc[n].stb == NULL) {
+        proc[n].no = n;
+        long sz = isz * sizeof(long) + bsz;
+        proc[n].st.i = (long*)getMem(VARS_SZ, sizeof(long));
+        proc[n].stb = getMem(CODE_SZ, sizeof(BYTE));
+        proc[n].locs = (long*)getMem(LOCS_SZ, sizeof(long));
+        proc[n].lstk = (long*)getMem(LOOP_SZ, sizeof(long));
+        proc[n].funcs = (long*)getMem(MAX_FN+1, sizeof(long));
+    }
+    setProc(n);
     s = sb - 1; h = 1; lb = lsp = 0;
     for (int i = 0; i < CODE_SZ; i++) { stb[i] = 0; }
-    for (int i = 0; i < VARS_SZ; i++) { st.i[i] = 0; }
+    for (int i = 0; i < VARS_SZ; i++) { st->i[i] = 0; }
     for (int i = 0; i <= MAX_FN; i++) { funcs[i] = 0; }
     if (files) { fpSp = 0; for (int i = 0; i < FILE_SZ; i++) { fpStk[i] = 0; } }
-    st.i[0] = h;
+    st->i[0] = h;
 }
 int funcN(int x) {
     unsigned long hh = stb[x++];
@@ -48,7 +70,7 @@ void dotQ(int delim) {
             if (c == 'd') { printStringF("%ld", POP); }
             else if (c == 'c') { putC((int)POP); }
             else if (c == 'e') { putC(27); }
-            else if (c == 'f') { printStringF("%g", st.f[s--]); }
+            else if (c == 'f') { printStringF("%g", st->f[s--]); }
             else if (c == 'n') { putC(13); putC(10); }
             else if (c == 'q') { putC('"'); }
             else if (c == 's') { printString((char*)&stb[POP]); }
@@ -60,7 +82,7 @@ void dotQ(int delim) {
     }
     if (delim) { ++p; }
 }
-void fStore() { st.i[TOS] = NOS; s -= 2; }
+void fStore() { st->i[TOS] = NOS; s -= 2; }
 void fDotQ() { dotQ('"'); }
 void fDup() { t = TOS; PUSH(t); }
 void fSwap() { t = TOS; TOS = NOS; NOS = t; }
@@ -78,11 +100,11 @@ void fDiv() { NOS /= TOS; s--; }
 void n09() {
     PUSH(u - '0');
     while (btw(stb[p],'0','9')) { TOS=(TOS*10)+stb[p++]-'0'; }
-    if (stb[p] == 'e') { ++p; st.f[s] = (float)TOS; }
+    if (stb[p] == 'e') { ++p; st->f[s] = (float)TOS; }
     else if (stb[p] == '.') { 
-        ++p; st.f[s] = (float)TOS;
+        ++p; st->f[s] = (float)TOS;
         float d = 10;
-        while (btw(stb[p],'0','9')) { st.f[s]+=(stb[p++]-'0')/d; d*=10; }
+        while (btw(stb[p],'0','9')) { st->f[s]+=(stb[p++]-'0')/d; d*=10; }
     }
 }
 void fCreate() {
@@ -98,17 +120,17 @@ void fCreate() {
             doFgets((char*)&stb[p], 128, fp);
         }
     }
-    if (h < (++p)) { h=p; st.i[0]=h; }
+    if (h < (++p)) { h=p; st->i[0]=h; }
 }
-void fRet() { p = st.i[r++]; if (rb < r) { r = rb; p = 0; } }
+void fRet() { p = st->i[r++]; if (rb < r) { r = rb; p = 0; } }
 void fLT() { NOS = (NOS < TOS) ? -1 : 0; s--; }
 void fEq() { NOS = (NOS == TOS) ? -1 : 0; s--; }
 void fGT() { NOS = (NOS > TOS) ? -1 : 0; s--; }
 void fLookup() { p = funcN(p); PUSH(fa); PUSH(fn); }
-void fFetch() { TOS = st.i[TOS]; }
+void fFetch() { TOS = st->i[TOS]; }
 void doExec(long addr) {
     if (!addr) { printString("-noimpl-"); return; }
-    if ((stb[p] != ';') && (stb[p] != '^')) { st.i[--r] = p; }
+    if ((stb[p] != ';') && (stb[p] != '^')) { st->i[--r] = p; }
     p = addr;
 }
 void fGoto() { p = POP; }
@@ -124,7 +146,7 @@ void fLoop() { if (++L0 < L1) { p = L2; } else { lsp -= 3; } }
 void fBegin() { lsp += 3; L0 = p; }
 void fWhile() { if (POP) { p = L0; } else { lsp -= 3; } }
 void fIndex() { PUSH(L0); }
-void fLeave() { p = st.i[r++]; }
+void fLeave() { p = st->i[r++]; }
 void fNeg() { TOS = -TOS; }
 void fSys() {
     int c = CODE_SZ - 100; t = c;
@@ -147,8 +169,8 @@ void fCOp() {
 void fROp() {
     u = stb[p++];
     if (u == '@') { PUSH(R0); }
-    else if (u == '<') { st.i[--r]=POP; }
-    else if (u == '>') { PUSH(st.i[r++]); }
+    else if (u == '<') { st->i[--r]=POP; }
+    else if (u == '>') { PUSH(st->i[r++]); }
 }
 void fWord() {
     u = stb[p++];
@@ -157,20 +179,20 @@ void fWord() {
 }
 void fFloat() {
     u = stb[p++];
-    if (u == '.') { printStringF("%g", st.f[s--]); }
-    else if (u == '@') { st.f[s] = st.f[TOS]; }
-    else if (u == '!') { st.f[TOS] = st.f[s - 1]; s -= 2; }
-    else if (u == '+') { st.f[s - 1] += st.f[s]; s--; }
-    else if (u == '-') { st.f[s - 1] -= st.f[s]; s--; }
-    else if (u == '*') { st.f[s - 1] *= st.f[s]; s--; }
-    else if (u == '/') { st.f[s - 1] /= st.f[s]; s--; }
-    else if (u == '_') { st.f[s] = -st.f[s]; }
-    else if (u == '<') { TOS = (st.f[s - 1] < st.f[s]) ? -1 : 0; }
-    else if (u == '>') { TOS = (st.f[s - 1] > st.f[s]) ? -1 : 0; }
-    else if (u == 'i') { TOS = (int)st.f[s]; }
-    else if (u == 'f') { st.f[s] = (float)TOS; }
-    else if (u == 'S') { st.f[s] = (float)sqrt(st.f[s]); }
-    else if (u == 'T') { st.f[s] = (float)tanh(st.f[s]); }
+    if (u == '.') { printStringF("%g", st->f[s--]); }
+    else if (u == '@') { st->f[s] = st->f[TOS]; }
+    else if (u == '!') { st->f[TOS] = st->f[s - 1]; s -= 2; }
+    else if (u == '+') { st->f[s - 1] += st->f[s]; s--; }
+    else if (u == '-') { st->f[s - 1] -= st->f[s]; s--; }
+    else if (u == '*') { st->f[s - 1] *= st->f[s]; s--; }
+    else if (u == '/') { st->f[s - 1] /= st->f[s]; s--; }
+    else if (u == '_') { st->f[s] = -st->f[s]; }
+    else if (u == '<') { TOS = (st->f[s - 1] < st->f[s]) ? -1 : 0; }
+    else if (u == '>') { TOS = (st->f[s - 1] > st->f[s]) ? -1 : 0; }
+    else if (u == 'i') { TOS = (int)st->f[s]; }
+    else if (u == 'f') { st->f[s] = (float)TOS; }
+    else if (u == 'S') { st->f[s] = (float)sqrt(st->f[s]); }
+    else if (u == 'T') { st->f[s] = (float)tanh(st->f[s]); }
     else if (u == 'O') { fOpen(); }
     else if (u == 'C') { fClose(); }
     else if (u == 'R') {
@@ -194,24 +216,24 @@ void fLoc() {
 }
 void fRegDec() {
     u = stb[p++];
-    if (btw(u, 'A', 'Z')) { st.i[u]--; }
+    if (btw(u, 'A', 'Z')) { st->i[u]--; }
     else if (btw(u, '0', '9')) { locs[lb + u - '0']--; }
     else { --p; --TOS; }
 }
 void fRegInc() {
     u = stb[p++];
-    if (btw(u, 'A', 'Z')) { st.i[u]++; }
+    if (btw(u, 'A', 'Z')) { st->i[u]++; }
     else if (btw(u, '0', '9')) { locs[lb + u - '0']++; }
     else { --p; ++TOS; }
 }
 void fRegGet() {
     u = stb[p++]; PUSH(0);
-    if (btw(u, 'A', 'Z')) { TOS = st.i[u]; }
+    if (btw(u, 'A', 'Z')) { TOS = st->i[u]; }
     else if (btw(u, '0', '9')) { TOS = locs[lb + u - '0']; }
 }
 void fRegSet() {
     u = stb[p++]; t = POP;
-    if (btw(u, 'A', 'Z')) { st.i[u] = t; }
+    if (btw(u, 'A', 'Z')) { st->i[u] = t; }
     else if (btw(u, '0', '9')) { locs[lb + u - '0'] = t; }
 }
 void fKey() {
@@ -219,7 +241,7 @@ void fKey() {
     else if (u == '@') { PUSH(getC()); }
 }
 void fMOp() { u = stb[p++]; if (u == '@') { TOS = *(char*)TOS; } } // else if (u=='!') { *(char*)TOS=(char)NOS; s-=2; } }
-void fDotS() { putC('('); for (int i=sb; i<=s; i++) { if (sb<i) { putC(32); } printStringF("%ld", st.i[i]); } putC(')'); }
+void fDotS() { putC('('); for (int i=sb; i<=s; i++) { if (sb<i) { putC(32); } printStringF("%ld", st->i[i]); } putC(')'); }
 void fType() { y = (char*)&stb[POP]; fputs(y, stdout); }
 void fRand() {
     if (!sd) { sd = (long)(y)+timerMS(); }
@@ -244,7 +266,10 @@ void fExt() {
     else if (u == 'W') { printStringF("-wait:%ld-", POP); } // WAIT
     else if (u == 'S') { fDotS(); }
     else if (u == '?') { fLookup(); }
-    else if (u == 'X') { init(0); p=0; } // Reset
+    else if (u == 'X') { init(0, VARS_SZ, CODE_SZ, curproc->no); p=0; } // Reset
+    else if (u == 'P') { t=POP;
+    if (proc[t].no != t) { init(1, VARS_SZ, CODE_SZ, t); p=0; } 
+    setProc(t); }
     else if (u == 'Q') { exit(0); } // Exit s3
 }
 void fUser() { p = doUser(u, p); }
@@ -284,13 +309,13 @@ void Loop() {
     Run(h);
 }
 int main(int argc, char* argv[]) {
-    init(1);
-    st.i[lb] = argc;
+    init(1, VARS_SZ, CODE_SZ, 0);
+    st->i[lb] = argc;
     u = 1000;
     for (int i = 1; i < argc; ++i) {
         y = argv[i]; t = atoi(y);
-        if ((t) || (y[0] == '0' && y[1] == 0)) { st.i[lb + i] = t; }
-        else { st.i[lb + i] = u; for (int j = 0; y[j]; j++) { stb[u++] = y[j]; } stb[u++] = 0; }
+        if ((t) || (y[0] == '0' && y[1] == 0)) { st->i[lb + i] = t; }
+        else { st->i[lb + i] = u; for (int j = 0; y[j]; j++) { stb[u++] = y[j]; } stb[u++] = 0; }
     }
     if ((argc > 1) && (argv[1][0] != '-')) { fp = doFopen(argv[1], 0); }
     if (!fp) { fp = doFopen("src.s3", 0); }
