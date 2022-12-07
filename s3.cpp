@@ -159,6 +159,7 @@ void fFloat() {
     else if (u == '-') { st.f[s - 1] -= st.f[s]; s--; }
     else if (u == '*') { st.f[s - 1] *= st.f[s]; s--; }
     else if (u == '/') { st.f[s - 1] /= st.f[s]; s--; }
+    else if (u == '_') { st.f[s] = -st.f[s]; }
     else if (u == '<') { TOS = (st.f[s - 1] < st.f[s]) ? -1 : 0; }
     else if (u == '>') { TOS = (st.f[s - 1] > st.f[s]) ? -1 : 0; }
     else if (u == 'i') { TOS = (int)st.f[s]; }
