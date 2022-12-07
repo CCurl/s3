@@ -1,6 +1,7 @@
 // s3.cpp - inspired by STABLE from Sandor Schneider
 
 #include "s3.h"
+// #define __DEBUG__
 
 ST_T st;
 static char *y;
@@ -143,15 +144,21 @@ void fBit() {
 void fCOp() {
     u = stb[p++];
     if (u == '@') { TOS = (BYTE)stb[TOS]; }
-    if (u == '!') { stb[TOS] = (BYTE)NOS; s -= 2; }
+    else if (u == '!') { stb[TOS] = (BYTE)NOS; s -= 2; }
+}
+void fROp() {
+    u = stb[p++];
+    if (u == '@') { PUSH(R0); }
+    else if (u == '<') { st.i[--r]=POP; }
+    else if (u == '>') { PUSH(st.i[r++]); }
 }
 void fWord() {
     u = stb[p++];
     if (u == '@') { TOS = (stb[TOS + 1] << 8) | stb[TOS]; }
-    if (u == '!') { stb[TOS] = (BYTE)NOS; stb[TOS + 1] = (BYTE)(NOS >> 8); s -= 2; }
+    else if (u == '!') { stb[TOS] = (BYTE)NOS; stb[TOS + 1] = (BYTE)(NOS >> 8); s -= 2; }
 }
 void fFloat() {
-    u = stb[p++]; // printf("-flt:%c-",u);
+    u = stb[p++];
     if (u == '.') { printStringF("%g", st.f[s--]); }
     else if (u == '@') { st.f[s] = st.f[TOS]; }
     else if (u == '!') { st.f[TOS] = st.f[s - 1]; s -= 2; }
@@ -214,25 +221,32 @@ void fKey() {
     else if (u == '@') { PUSH(getC()); }
 }
 void fMOp() { u = stb[p++]; if (u == '@') { TOS = *(char*)TOS; } } // else if (u=='!') { *(char*)TOS=(char)NOS; s-=2; } }
-void fDotS() { for (int i=sb; i<=s; i++) { if (sb<i) { putC(32); } printStringF("%ld", st.i[i]); } }
+void fDotS() { putC('('); for (int i=sb; i<=s; i++) { if (sb<i) { putC(32); } printStringF("%ld", st.i[i]); } putC(')'); }
 void fType() { y = (char*)&stb[POP]; fputs(y, stdout); }
 void fRand() {
     if (!sd) { sd = (long)(y)+timerMS(); }
     sd = (sd << 13) ^ sd; sd = (sd >> 17) ^ sd; sd = (sd << 5) ^ sd;
     PUSH(sd);
 }
+void fCheckStk() {
+        if (s<sb-1) { printStringF("-underflow at %d-",p-1); p=0; }
+        if (r<=s) { printStringF("-overflow at %d-",p-1); p=0; }
+}
 void fExt() {
     u = stb[p++];
     if (u == '%') { NOS %= TOS; s--; } // MOD
-    else if (u == ']') { u = (L0 < L1) ? 1 : 0; L0 += POP; fLoopS(u); } // +LOOP
     else if (u == 'R') { fRand(); }
+    else if (u == ']') { u = (L0 < L1) ? 1 : 0; L0 += POP; fLoopS(u); } // +LOOP
+    else if (u == '|') { PUSH(p); PUSH(0); while (stb[p++]!=u) { ++TOS; } }
     else if (u == 'L') { fLoad(); } // ABS
     else if (u == 'Y') { TOS = (long)&stb[TOS]; fSystem(); } // system
     else if (u == 'T') { PUSH(timerMS()); } // TIMER/MILLIS
     else if (u == 'N') { PUSH(timerNS()); } // TIMER/MICROS
     else if (u == 'U') { lsp += 3; } // UNLOOP
     else if (u == 'W') { printStringF("-wait:%ld-", POP); } // WAIT
-    else if (u == 'X') { init(0); p = 0; } // Reset
+    else if (u == 'S') { fDotS(); }
+    else if (u == '?') { fLookup(); }
+    else if (u == 'X') { init(0); p=0; } // Reset
     else if (u == 'Q') { exit(0); } // Exit s3
 }
 void fUser() { p = doUser(u, p); }
@@ -243,13 +257,21 @@ void fLNot() { TOS = (TOS) ? 0 : -1; }
 void (*jmpTbl[128])() = {
     X,X,X,X,X,X,X,X,X,X,N,X,X,N,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,                        //   0:31
     N,fStore,fDotQ,fDup,fSwap,fOver,fSlMod,fAscii,fIf,N,fMult,fAdd,fEmit,fSub,fDot,fDiv,    //  32:47
-    n09,n09,n09,n09,n09,n09,n09,n09,n09,n09,fCreate,fRet,fLT,fEq,fGT,fLookup,               //  48:63
+    n09,n09,n09,n09,n09,n09,n09,n09,n09,n09,fCreate,fRet,fLT,fEq,fGT,X,                     //  48:63
     fFetch,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,                                    //  64:79
     AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,fDo,fDrop,fLoop,fLeave,fNeg,                           //  80:95
-    fSys,fAbs,fBit,fCOp,fRegDec,fExec,fFloat,fGoto,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,  //  96:111
-    X,fDotS,fRegGet,fRegSet,fType,fUser,X,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };  // 112:127
+    fSys,fAbs,fBit,fCOp,fRegDec,X,fFloat,X,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,          //  96:111
+    X,fROp,fRegGet,fRegSet,fType,fUser,X,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };   // 112:127
 
-void Run(int x) { s=(s<sb)?(sb-1):s; r=rb; lsp=0; p=x; while (p) { u=stb[p++]; jmpTbl[u](); } }
+void Run(int x) { 
+    s=(s<sb)?(sb-1):s; r=rb; lsp=0; p=x;
+    while (p) {
+        u=stb[p++]; jmpTbl[u]();
+#ifdef __DEBUG__
+        fCheckStk();
+#endif
+    } 
+}
 #ifdef __PC__
 void Hist(char *s) { FILE *fp = fopen("h.txt", "at"); if (fp) { fprintf(fp, "%s", s); fclose(fp); } }
 void Loop() {
@@ -258,7 +280,7 @@ void Loop() {
         doFclose(fp);
         fp = (0 < fpSp) ? fpStk[--fpSp] : (long)stdin;
     }
-    if (fp == (long)stdin) { printString("\ns3:("); fDotS(); printString(")>"); }
+    if (fp == (long)stdin) { printString("\ns3:"); fDotS(); putC('>'); }
     y = (char*)&stb[h]; *y = 0; doFgets(y, 128, fp);
     if (fp == (long)stdin) { Hist(y); }
     Run(h);

@@ -116,7 +116,7 @@ Many interpreted environments have a large SWITCH statement with cases in a loop
     :JUMPTABLE 10000;
     :JTSET  0(a n--) JUMPTABLE+!;
     :JTGET  0(n--a)  JUMPTABLE+@;
-    :JTEXEC 0(n--)   JTGET e;
+    :JTEXEC 0(n--)   JTGETq<;
     :_"-this is A-"; 'A JTSET
     :_"-this is B-"; 'B JTSET
     'A JTEXEC
@@ -145,14 +145,18 @@ b~  (a--b)        b: NOT a (ones-complement, e.g - 101011 => 010100)
 
 
 *** STACK ***
-#  (a--a a)       Duplicate TOS                    (DUP)
-\  (a b--a)       Drop TOS                         (DROP)
-$  (a b--b a)     Swap top 2 stack items           (SWAP)
-%  (a b--a b a)   Push 2nd                         (OVER)
+#  (a--a a)       Duplicate TOS                    (Forth: DUP)
+\  (a b--a)       Drop TOS                         (Forth: DROP)
+$  (a b--b a)     Swap top 2 stack items           (Forth: SWAP)
+%  (a b--a b a)   Push 2nd                         (Forth: OVER)
 _  (a--b)         b: -a                            (Negate)
 a  (a--b)         b: ABS(a)                        (Absolute)
 i  (x--y)         y: x+1                           (Increment)
 d  (x--y)         y: x-1                           (Decrement)
+xS (--)           Print the contents of the stack  (Forth: .S)
+q< (n--)          Move TOS to return stack         (Forth: >R)
+q@ (--n)          Copy return stack TOS            (Forth: R@)
+q> (--n)          Move return stack TOS back       (Forth: R>)
 
 
 *** FLOATING POINT ***
@@ -160,7 +164,7 @@ d  (x--y)         y: x-1                           (Decrement)
 12.34 (--F)       F: 123.45
 ff    (n--F)      n: integer, F: float
 fi    (F--n)      F: float, n: integer
-f_    (F--N)      N: -F (Float-Negate)
+f_    (F--N)      N: -F (Negate)
 f.    (F--)       Output F
 f@    (a--F)      Fetch float F from address a
 f!    (F a--)     Store float F to address a
@@ -217,7 +221,7 @@ ABCD  (--)        Execute/call word ABCD.
 ^     (--)        Exit word immediately.
         NOTE: To exit a word while inside of a loop, use 'xU^'.
               example: :LOOPTEST 100 0[n.b n71=("-out" xU^)", "];
-?ABCD (--A H)     A: BYTE address of ABCD (0 if not defined), H: hash for "ABCD".
+x?FN (--a h)      a: BYTE address of FN, h: hash for "FN"
 
 
 *** INPUT/OUTPUT ***
@@ -245,8 +249,9 @@ b      (--)       Output a single SPACE.
 `dir`  (--)       Calls system("dir").
 xY     (A--)      Sends string at BYTE address A to system() (example: 1000#|ls|\xY).
 |XXX|  (a--b)     Copies XXX to BYTE address a, b is the next address after the NULL terminator.
+x|XXX| (--a n)    a: BYTE address, n:number of chars.
 z      (a--)      ZTYPE: Output the formatted string at BYTE address a (see ").
-t      (a--)      TYPE: Output the string at BYTE address a (faster, no formatting).
+t      (a--)      TYPE: Output the NULL-terminated string at BYTE address a (faster, no formatting).
 k?     (--f)      TODO: f: 1 if a character is waiting in the input buffer, else 0.
 k@     (--c)      TODO: c: next character from the input buffer. If no character, wait.
 

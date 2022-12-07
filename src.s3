@@ -19,12 +19,13 @@ xX 0(reset s3)
 :JMPTBL 10000;
 :JTSET  0(a n--) JMPTBL+!;
 :JTGET  0(n--a)  JMPTBL+@;
-:JTEXEC 0(n--)   JTGET e;
+:JTEXEC 0(n--)   JTGETq<;
 :_"-anonynous A-"; 'A JTSET
 :_"-anonynous B-"; 'B JTSET
 :RELOAD 1000#|src.s3|\xL;
 VER
 123 sA 44567 sZ
+CR 345.678 f. " (sb-345.678)"
 CR REGS
 CR HELLOWORLD
 CR 1 YN 0 YN
