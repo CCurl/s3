@@ -76,8 +76,13 @@ void fMult() { NOS *= TOS; s--; }
 void fDiv() { NOS /= TOS; s--; }
 void n09() {
     PUSH(u - '0');
-    while (btw(stb[p], '0', '9')) { TOS = (TOS * 10) + stb[p++] - '0'; }
+    while (btw(stb[p],'0','9')) { TOS=(TOS*10)+stb[p++]-'0'; }
     if (stb[p] == 'e') { ++p; st.f[s] = (float)TOS; }
+    else if (stb[p] == '.') { 
+        ++p; st.f[s] = (float)TOS;
+        float d = 10;
+        while (btw(stb[p],'0','9')) { st.f[s]+=(stb[p++]-'0')/d; d*=10; }
+    }
 }
 void fCreate() {
     if (stb[p] == '_') { PUSH(++p); u = 999; }
