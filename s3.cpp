@@ -86,21 +86,19 @@ void n09() {
     }
 }
 void fCreate() {
-    if (stb[p] == '_') { PUSH(++p); u = 999; }
-    else {
-        p = funcN(p);
-        if (fa) { printStringF("-redef:%ld to %ld,hash(%ld)-", fa, p, fn); }
-    }
+    if (stb[p] == '_') { PUSH(++p); u=0; }
+    else { p = funcN(p); }
+    if (u && fa) { printStringF("-redef:%ld to %ld,hash(%ld)-", fa, p, fn); }
     while (stb[p] == ' ') { ++p; }
-    if (u != 999) { funcs[fn] = p; }
+    if (u) { funcs[fn] = p; }
     while (stb[p] != ';') {
-        if (stb[p]) { if (stb[p] < 32) { stb[p] = 32; } ++p; }
+        if (stb[p]) { if (stb[p]<32) { stb[p]=32; } ++p; }
         else {
             if (fp == (long)stdin) { printString(": "); }
             doFgets((char*)&stb[p], 128, fp);
         }
     }
-    if (h < (++p)) { h = p; st.i[0] = h; }
+    if (h < (++p)) { h=p; st.i[0]=h; }
 }
 void fRet() { p = st.i[r++]; if (rb < r) { r = rb; p = 0; } }
 void fLT() { NOS = (NOS < TOS) ? -1 : 0; s--; }
