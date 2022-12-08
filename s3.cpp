@@ -227,8 +227,8 @@ void fRand() {
     PUSH(sd);
 }
 void fCheckStk() {
-        if (s<sb-1) { printStringF("-underflow at %d-",p-1); p=0; }
-        if (r<=s) { printStringF("-overflow at %d-",p-1); p=0; }
+        if (s<sb-1) { printStringF("-underflow at %ld-",p-1); p=0; }
+        if (r<=s) { printStringF("-overflow at %ld-",p-1); p=0; }
 }
 void fExt() {
     u = stb[p++];
