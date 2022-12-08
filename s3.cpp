@@ -5,14 +5,10 @@
 
 ST_T st;
 static char *y;
-BYTE stb[CODE_SZ];
-long locs[LOCS_SZ+10], lb, lstk[LOOP_SZ+1], lsp;
-long h, sb = 4, rb = 64, r, s, t, u, fpSp;
-long fn, fa, p, sd, fp, funcs[MAX_FN+1], fpStk[FILE_SZ];
-
-#define L0 lstk[lsp]
-#define L1 lstk[lsp-1]
-#define L2 lstk[lsp-2]
+uint8_t stb[CODE_SZ];
+int32_t locs[LOCS_SZ+10], lb, lstk[LOOP_SZ+1], lsp;
+int32_t h, sb = 4, rb = 64, r, s, t, u, fpSp;
+int32_t fn, fa, p, sd, fp, funcs[MAX_FN+1], fpStk[FILE_SZ];
 
 void init(int files) {
     s = sb - 1; h = 1; lb = lsp = 0;
@@ -23,7 +19,7 @@ void init(int files) {
     st.i[0] = h;
 }
 int funcN(int x) {
-    unsigned long hh = stb[x++];
+    int32_t hh = stb[x++];
     while (btw(stb[x], 'A', 'Z')) { hh = (hh*33) + stb[x++]; }
     fn = (hh & MAX_FN); fa = funcs[fn];
     return x;
@@ -35,7 +31,7 @@ void fOpen() { t = POP; y = (char*)&stb[TOS]; TOS = doFopen(y, t); }
 void fClose() { t = POP; if (t) { doFclose(t); } }
 void fLoad() {
     PUSH(0); fOpen(); t = POP;
-    if (t) { if (fp != (long)stdin) { fpStk[++fpSp] = fp; } fp = t; }
+    if (t) { if (fp != (int32_t)stdin) { fpStk[++fpSp] = fp; } fp = t; }
     else { printString("-loadFail-"); }
 }
 void dotQ(int delim) {
@@ -78,11 +74,11 @@ void fDiv() { NOS /= TOS; s--; }
 void n09() {
     PUSH(u - '0');
     while (btw(stb[p],'0','9')) { TOS=(TOS*10)+stb[p++]-'0'; }
-    if (stb[p] == 'e') { ++p; st.f[s] = (float)TOS; }
+    if (stb[p] == 'e') { ++p; FTOS = (float)TOS; }
     else if (stb[p] == '.') { 
-        ++p; st.f[s] = (float)TOS;
+        ++p; FTOS = (float)TOS;
         float d = 10;
-        while (btw(stb[p],'0','9')) { st.f[s]+=(stb[p++]-'0')/d; d*=10; }
+        while (btw(stb[p],'0','9')) { FTOS+=(stb[p++]-'0')/d; d*=10; }
     }
 }
 void fCreate() {
@@ -94,7 +90,7 @@ void fCreate() {
     while (stb[p] != ';') {
         if (stb[p]) { if (stb[p]<32) { stb[p]=32; } ++p; }
         else {
-            if (fp == (long)stdin) { printString(": "); }
+            if (fp == (int32_t)stdin) { printString(": "); }
             doFgets((char*)&stb[p], 128, fp);
         }
     }
@@ -106,7 +102,7 @@ void fEq() { NOS = (NOS == TOS) ? -1 : 0; s--; }
 void fGT() { NOS = (NOS > TOS) ? -1 : 0; s--; }
 void fLookup() { p = funcN(p); PUSH(fa); PUSH(fn); }
 void fFetch() { TOS = st.i[TOS]; }
-void doExec(long addr) {
+void doExec(int32_t addr) {
     if (!addr) { printString("-noimpl-"); return; }
     if ((stb[p] != ';') && (stb[p] != '^')) { st.i[--r] = p; }
     p = addr;
@@ -141,8 +137,8 @@ void fBit() {
 }
 void fCOp() {
     u = stb[p++];
-    if (u == '@') { TOS = (BYTE)stb[TOS]; }
-    else if (u == '!') { stb[TOS] = (BYTE)NOS; s -= 2; }
+    if (u == '@') { TOS = (uint8_t)stb[TOS]; }
+    else if (u == '!') { stb[TOS] = (uint8_t)NOS; s -= 2; }
 }
 void fROp() {
     u = stb[p++];
@@ -153,24 +149,24 @@ void fROp() {
 void fWord() {
     u = stb[p++];
     if (u == '@') { TOS = (stb[TOS + 1] << 8) | stb[TOS]; }
-    else if (u == '!') { stb[TOS] = (BYTE)NOS; stb[TOS + 1] = (BYTE)(NOS >> 8); s -= 2; }
+    else if (u == '!') { stb[TOS] = (uint8_t)NOS; stb[TOS + 1] = (uint8_t)(NOS >> 8); s -= 2; }
 }
 void fFloat() {
     u = stb[p++];
     if (u == '.') { printStringF("%g", st.f[s--]); }
-    else if (u == '@') { st.f[s] = st.f[TOS]; }
-    else if (u == '!') { st.f[TOS] = st.f[s - 1]; s -= 2; }
-    else if (u == '+') { st.f[s - 1] += st.f[s]; s--; }
-    else if (u == '-') { st.f[s - 1] -= st.f[s]; s--; }
-    else if (u == '*') { st.f[s - 1] *= st.f[s]; s--; }
-    else if (u == '/') { st.f[s - 1] /= st.f[s]; s--; }
-    else if (u == '_') { st.f[s] = -st.f[s]; }
-    else if (u == '<') { TOS = (st.f[s - 1] < st.f[s]) ? -1 : 0; }
-    else if (u == '>') { TOS = (st.f[s - 1] > st.f[s]) ? -1 : 0; }
-    else if (u == 'i') { TOS = (int)st.f[s]; }
-    else if (u == 'f') { st.f[s] = (float)TOS; }
-    else if (u == 'S') { st.f[s] = (float)sqrt(st.f[s]); }
-    else if (u == 'T') { st.f[s] = (float)tanh(st.f[s]); }
+    else if (u == '@') { FTOS = st.f[TOS]; }
+    else if (u == '!') { st.f[TOS] = FNOS; s -= 2; }
+    else if (u == '+') { FNOS += FTOS; s--; }
+    else if (u == '-') { FNOS -= FTOS; s--; }
+    else if (u == '*') { FNOS *= FTOS; s--; }
+    else if (u == '/') { FNOS /= FTOS; s--; }
+    else if (u == '_') { FTOS = -FTOS; }
+    else if (u == '<') { TOS = (FNOS < FTOS) ? -1 : 0; }
+    else if (u == '>') { TOS = (FNOS > FTOS) ? -1 : 0; }
+    else if (u == 'i') { TOS = (int)FTOS; }
+    else if (u == 'f') { FTOS = (float)TOS; }
+    else if (u == 'S') { FTOS = (float)sqrt(FTOS); }
+    else if (u == 'T') { FTOS = (float)tanh(FTOS); }
     else if (u == 'O') { fOpen(); }
     else if (u == 'C') { fClose(); }
     else if (u == 'R') {
@@ -222,7 +218,7 @@ void fMOp() { u = stb[p++]; if (u == '@') { TOS = *(char*)TOS; } } // else if (u
 void fDotS() { putC('('); for (int i=sb; i<=s; i++) { if (sb<i) { putC(32); } printStringF("%ld", st.i[i]); } putC(')'); }
 void fType() { y = (char*)&stb[POP]; fputs(y, stdout); }
 void fRand() {
-    if (!sd) { sd = (long)(y)+timerMS(); }
+    if (!sd) { sd = (int32_t)(y)+timerMS(); }
     sd = (sd << 13) ^ sd; sd = (sd >> 17) ^ sd; sd = (sd << 5) ^ sd;
     PUSH(sd);
 }
@@ -237,7 +233,7 @@ void fExt() {
     else if (u == ']') { u = (L0 < L1) ? 1 : 0; L0 += POP; fLoopS(u); } // +LOOP
     else if (u == '|') { PUSH(p); PUSH(0); while (stb[p++]!=u) { ++TOS; } }
     else if (u == 'L') { fLoad(); } // ABS
-    else if (u == 'Y') { TOS = (long)&stb[TOS]; fSystem(); } // system
+    else if (u == 'Y') { TOS = (int32_t)&stb[TOS]; fSystem(); } // system
     else if (u == 'T') { PUSH(timerMS()); } // TIMER/MILLIS
     else if (u == 'N') { PUSH(timerNS()); } // TIMER/MICROS
     else if (u == 'U') { lsp += 3; } // UNLOOP
@@ -248,7 +244,7 @@ void fExt() {
     else if (u == 'Q') { exit(0); } // Exit s3
 }
 void fUser() { p = doUser(u, p); }
-void fZType() { TOS = (long)&stb[TOS]; dotQ(0); }
+void fZType() { TOS = (int32_t)&stb[TOS]; dotQ(0); }
 void fQt() { while (stb[p] != '|') { stb[TOS++] = stb[p++]; } stb[TOS++] = 0; ++p; }
 void fLNot() { TOS = (TOS) ? 0 : -1; }
 
@@ -274,13 +270,13 @@ void Run(int x) {
 void Hist(char *s) { FILE *fp = fopen("h.txt", "at"); if (fp) { fprintf(fp, "%s", s); fclose(fp); } }
 void Loop() {
     if (feof((FILE*)fp)) {
-        if (fp == (long)stdin) { exit(0); }
+        if (fp == (int32_t)stdin) { exit(0); }
         doFclose(fp);
-        fp = (0 < fpSp) ? fpStk[--fpSp] : (long)stdin;
+        fp = (0 < fpSp) ? fpStk[--fpSp] : (int32_t)stdin;
     }
-    if (fp == (long)stdin) { printString("\ns3:"); fDotS(); putC('>'); }
+    if (fp == (int32_t)stdin) { printString("\ns3:"); fDotS(); putC('>'); }
     y = (char*)&stb[h]; *y = 0; doFgets(y, 128, fp);
-    if (fp == (long)stdin) { Hist(y); }
+    if (fp == (int32_t)stdin) { Hist(y); }
     Run(h);
 }
 int main(int argc, char* argv[]) {
@@ -294,7 +290,7 @@ int main(int argc, char* argv[]) {
     }
     if ((argc > 1) && (argv[1][0] != '-')) { fp = doFopen(argv[1], 0); }
     if (!fp) { fp = doFopen("src.s3", 0); }
-    if (!fp) { fp = (long)stdin; }
+    if (!fp) { fp = (int32_t)stdin; }
     while (1) { Loop(); }
     return 0;
 }

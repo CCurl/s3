@@ -1,15 +1,6 @@
 #ifndef __s3_h__
 #define __s3_h__
 
-#define btw(a,b,c) ((b<=a) && (a<=c))
-#define TOS      st.i[s]
-#define NOS      st.i[s-1]
-#define PUSH(x)  st.i[++s]=(long)(x)
-#define POP      st.i[s--]
-#define R0       st.i[r]
-#define R1       st.i[r+1]
-#define R2       st.i[r+2]
-
 #ifdef _WIN32
     #define __PC__
     #define _CRT_SECURE_NO_WARNINGS
@@ -17,10 +8,30 @@
     #define __PC__
 #endif
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <math.h>
+#include <time.h>
+
+#define btw(a,b,c) ((b<=a) && (a<=c))
+#define TOS      st.i[s]
+#define NOS      st.i[s-1]
+#define FTOS     st.f[s]
+#define FNOS     st.f[s-1]
+#define PUSH(x)  st.i[++s]=(long)(x)
+#define POP      st.i[s--]
+#define R0       st.i[r]
+#define R1       st.i[r+1]
+#define R2       st.i[r+2]
+#define L0       lstk[lsp]
+#define L1       lstk[lsp-1]
+#define L2       lstk[lsp-2]
+
 // NOTE: change these for your application
 #ifdef __PC__
-    #define CODE_SZ        (64*1024)
-    #define VARS_SZ        (64*1024)
+    #define CODE_SZ        (1024*1024)
+    #define VARS_SZ        (1024*1024)
     #define FILE_SZ             10
     #define LOCS_SZ             90
     #define LOOP_SZ             30
@@ -37,13 +48,7 @@
     #define MAX_FN          0x07FF
 #endif
 
-typedef unsigned char BYTE;
-typedef union { float f[VARS_SZ]; long i[VARS_SZ]; } ST_T;
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <time.h>
+typedef union { float f[VARS_SZ]; int32_t i[VARS_SZ]; } ST_T;
 
 #ifdef __PC__
     #define printStringF printf

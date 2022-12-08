@@ -10,7 +10,7 @@ xX 0(reset s3)
 :BENCHW xT$ {d#}\ ELAPSED;
 :ELAPSED xT$-." usecs";
 :MIL 1000#**;
-:BENCHES 0 [# MIL BENCH CR]\;
+:BENCHES 0 [# MIL BENCH " "]\;
 :ULTESTD "UnloopTest-DO: " 100 1[n .b n 23=("-out"xU^)] "ERROR!";
 :ULTESTW "UnloopTest-WHILE: " 100{# .b #73=("-out"\xU^) 1-#} "ERROR!";
 :MULTI "This"
@@ -30,8 +30,8 @@ CR REGS
 CR HELLOWORLD
 CR 1 YN 0 YN
 CR 111 222 LOCS
-CR "DO-BENCH " 50 MIL BENCH
 CR "WHILE-BENCH " 50 MIL BENCHW
+CR "DO-BENCH " 500 2 BENCHES
 CR ULTESTD "-back"
 CR ULTESTW "-back"
 CR MULTI
