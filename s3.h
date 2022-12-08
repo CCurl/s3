@@ -88,7 +88,7 @@ typedef union { float f[VARS_SZ]; int32_t i[VARS_SZ]; } ST_T;
     extern long timerMS();
     extern long timerNS();
 
-    extern BYTE stb[];
+    extern uint8_t stb[];
     extern long s, h;
     extern ST_T st;
 #endif // __PC__

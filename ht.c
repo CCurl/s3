@@ -1,5 +1,10 @@
 // ht - Hash Test program
 
+// NB: the Arduino IDE is STUPID
+#define __IS_ARDUINO__
+
+#ifndef __IS_ARDUINO__
+
 #include <stdio.h>
 #include <time.h>
 
@@ -41,7 +46,7 @@ unsigned short doHash4(const char *v) {
     return s & bk;
 }
 
-unsigned long sd = 0;
+static unsigned long sd = 0;
 int rand(int lo, int hi) {
     if (sd == 0) { sd = (long)&sd+(long)rand; }
     sd = (sd<<13)^sd;
@@ -100,3 +105,4 @@ int main() {
         // doTests(4, ns);
     }
 }
+#endif

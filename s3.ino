@@ -2,9 +2,8 @@
 #include <stdarg.h>
 #include "s3.h"
 
-
-long timerMS() { return millis(); }
-long timerNS() { return micros(); }
+int32_t timerMS() { return millis(); }
+int32_t timerNS() { return micros(); }
 
 #ifdef mySerial
     void SerialInit() {
@@ -41,11 +40,11 @@ long timerNS() { return micros(); }
 #ifdef __FILES__
 #include "files.h"
 #else
-long doFopen(const char *fn, int mode) { return 0; }
-void doFclose(long fh) { }
-char *doFgets(char *buf, int sz, long fh) { *buf = 0; return buf; }
-int doFread(void* buf, int sz, int num, long fh) { return 0; }
-int doFwrite(void* buf, int sz, int num, long fh) { return 0; }
+int32_t doFopen(const char *fn, int mode) { return 0; }
+void doFclose(int32_t fh) { }
+char *doFgets(char *buf, int sz, int32_t fh) { *buf = 0; return buf; }
+int doFread(void* buf, int sz, int num, int32_t fh) { return 0; }
+int doFwrite(void* buf, int sz, int num, int32_t fh) { return 0; }
 #endif // __FILES__
 
 int isOTA = 0;
@@ -63,7 +62,7 @@ void gp_PressRelease(int btn) {
     Gamepad.write();        
 }
 
-long doGamePad(long ir, long pc) {
+int32_t doGamePad(int32_t ir, int32_t pc) {
     ir = stb[pc++];
     switch (ir) {
     case 'X': Gamepad.xAxis(POP);          break;
@@ -80,13 +79,13 @@ long doGamePad(long ir, long pc) {
     return pc;
 }
 #else
-long doGamePad(long ir, long pc) { printString("-noGamepad-"); return pc; }
+int32_t doGamePad(int32_t ir, int32_t pc) { printString("-noGamepad-"); return pc; }
 void gamePadBegin() { }
 #endif // __GAMEPAD__
 
-long doPin(long pc) {
-    long pin = POP;
-    byte ir = stb[pc++];
+int32_t doPin(int32_t pc) {
+    int32_t pin = POP;
+    uint8_t ir = stb[pc++];
     switch (ir) {
     case 'I': pinMode(pin, INPUT);          break;
     case 'O': pinMode(pin, OUTPUT);         break;
@@ -105,7 +104,7 @@ long doPin(long pc) {
     return pc;
 }
 
-long doUser(long ir, long pc) {
+int32_t doUser(int32_t ir, int32_t pc) {
     switch (ir) {
     case 'G': pc = doGamePad(ir, pc);       break;
     case 'P': pc = doPin(pc);               break;
@@ -118,7 +117,7 @@ long doUser(long ir, long pc) {
 }
 
 void loadCode(const char* src) {
-    long x = h;
+    int32_t x = h;
     printString(src);
     printString("\r\n");
     while (*src) { stb[x++] = *(src++); }
@@ -149,7 +148,7 @@ int isBackSpace(char c) {
 }
 
 void handleInput(char c) {
-    static long here = 0;
+    static int32_t here = 0;
     if (here == 0) { here = h; }
     if (c == 13) {
         printString(" ");
@@ -183,7 +182,7 @@ void setup() {
 }
 
 void do_autoRun() {
-    // long x = st.i[1];
+    // int32_t x = st.i[1];
     // if (x) { Run(x); }
 }
 
@@ -191,9 +190,9 @@ void do_autoRun() {
 // #define LED_BUILTIN 16
 void loop() {
     static int iLed = 0;
-    static long nextBlink = 0;
+    static int32_t nextBlink = 0;
     static int ledState = LOW;
-    long curTm = timerMS();
+    int32_t curTm = timerMS();
 
     if (iLed == 0) {
         loadBaseSystem();
