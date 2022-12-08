@@ -2,7 +2,7 @@ xX 0(reset s3)
 :CR "%n";
 :CODE 0@1[nc@#58=(n1-c@59=(13,10,),];
 :YN #("y")~("n");
-:REGS 'Z'A[n@(n@n"%n%c: %d")];
+:REGS 'Zi'A[n@(n@n"%n%c: %d")];
 :HELLOWORLD "hello world!";
 :LOCS s3 s4 i3 d4 r3 r4 + "locals: %d";
 :VER "s3 v0.0.1";
