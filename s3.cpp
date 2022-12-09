@@ -133,6 +133,7 @@ void fBit() {
     else if (u == '&') { NOS &= TOS; s--; }
     else if (u == '|') { NOS |= TOS; s--; }
     else if (u == '^') { NOS ^= TOS; s--; }
+    else if (u == '%') { PUSH(0); while (btw(stb[p],'0','1')) { TOS=(TOS*2)+stb[p++]-'0'; } }
     else { putc(32, stdout); --p; }
 }
 void fCOp() {

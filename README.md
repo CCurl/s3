@@ -231,7 +231,8 @@ NNN    (--n)      Scan decimal number. For multiple numbers, separate them by sp
 NNNe   (--F)      Scan floating point number (e.g. - 355e)
 NN.dd  (--F)      Scan floating point number (e.g. - 3.14159)
 'x     (--n)      n: the ASCII value of x.
-hXXX   (--h)      Scan XXX as a HEX number (0-9, A-F, a-f).
+hXXX   (--h)      Scan XXX as a HEX number X:[0..9 or A..F or a..f].
+b%XXX  (--h)      Scan XXX as a BINARY number X:[0..1].
 .      (N--)      Output N as decimal number.
 f.     (F--)      Output F as floating point number.
 ,      (N--)      Output N an ASCII character.
