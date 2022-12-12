@@ -181,7 +181,6 @@ void fHex() {
     while (1) {
         if (btw(stb[p], '0', '9')) { TOS = (TOS * 16) + stb[p++] - '0'; }
         else if (btw(stb[p], 'A', 'F')) { TOS = (TOS * 16) + stb[p++] - 'A' + 10; }
-        else if (btw(stb[p], 'a', 'f')) { TOS = (TOS * 16) + stb[p++] - 'a' + 10; }
         else { return; }
     }
 }
