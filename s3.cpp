@@ -34,6 +34,12 @@ void fLoad() {
     if (t) { if (fp != (cell_t)stdin) { fpStk[++fpSp] = fp; } fp = t; }
     else { printString("-loadFail-"); }
 }
+void printBinary(cell_t v) {
+    char x[64], *cp=&x[63];
+    *(cp) = 0;
+    do { for (int i=0; i<4; i++) { *(--cp)=(v&1)+'0'; v/=2; } } while (v);
+    printString(cp);
+}
 void dotQ(int delim) {
     y = (char*)&stb[p];
     if (delim == 0) { y = (char*)POP; }
@@ -48,6 +54,7 @@ void dotQ(int delim) {
             else if (c == 'n') { putC(13); putC(10); }
             else if (c == 'q') { putC('"'); }
             else if (c == 's') { printString((char*)&stb[POP]); }
+            else if (c == 'b') { printBinary(POP); }
             else if (c == 'X') { printStringF("%lX", POP); }
             else if (c == 'x') { printStringF("%lx", POP); }
             else { putC(c); }

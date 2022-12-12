@@ -239,6 +239,7 @@ f.     (F--)      Output F as floating point number.
 b      (--)       Output a single SPACE (NOTE: bit ops take precedence).
 "      (?--?)     Output a formatted string until the next '"'.
     NOTES: - %d outputs TOS as an integer
+           - %b outputs TOS as a binary number
            - %c outputs TOS as a character
            - %e outputs an ESCAPE (27)
            - %f outputs TOS as a float
@@ -246,7 +247,7 @@ b      (--)       Output a single SPACE (NOTE: bit ops take precedence).
            - %q outputs a QUOTE
            - %X outputs TOS as a hex number (A-F are uppercase)
            - %x outputs TOS as a hex number (A-F are lowercase)
-           - %<x> outputs <x> (eg - %% outputs %)
+           - %<x> outputs <x> (e.g. - "%%" outputs %)
 `dir`  (--)       Calls system("dir").
 xY     (A--)      Sends string at BYTE address A to system() (example: 1000#|ls|\xY).
 |XXX|  (a--b)     Copies XXX to BYTE address a, b is the next address after the NULL terminator.
