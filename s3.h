@@ -4,8 +4,10 @@
 #ifdef _WIN32
     #define __PC__
     #define _CRT_SECURE_NO_WARNINGS
+    #define  CELL_T int32_t
 #elif _LINUX
     #define __PC__
+    #define  CELL_T int64_t
 #endif
 
 #include <stdio.h>
@@ -14,16 +16,23 @@
 #include <math.h>
 #include <time.h>
 
+#ifndef CELL_T
+#define CELL_T long
+#endif
+
 #define btw(a,b,c) ((b<=a) && (a<=c))
-#define TOS      st.i[s]
-#define NOS      st.i[s-1]
-#define FTOS     st.f[s]
-#define FNOS     st.f[s-1]
-#define PUSH(x)  st.i[++s]=(long)(x)
-#define POP      st.i[s--]
-#define R0       st.i[r]
-#define R1       st.i[r+1]
-#define R2       st.i[r+2]
+#define STI(x)   st.i[x]
+#define STF(x)   st.f[x]
+#define STB(x)   stb[x]
+#define TOS      STI(s)
+#define NOS      STI(s-1)
+#define FTOS     STF(s)
+#define FNOS     STF(s-1)
+#define PUSH(x)  STI(++s)=(cell_t)(x)
+#define POP      STI(s--)
+#define R0       STI(r)
+#define R1       STI(r+1)
+#define R2       STI(r+2)
 #define L0       lstk[lsp]
 #define L1       lstk[lsp-1]
 #define L2       lstk[lsp-2]
@@ -48,21 +57,22 @@
     #define MAX_FN          0x07FF
 #endif
 
-typedef union { float f[VARS_SZ]; int32_t i[VARS_SZ]; } ST_T;
+typedef CELL_T cell_t;
+typedef union { float f[VARS_SZ]; cell_t i[VARS_SZ]; } ST_T;
 
 #ifdef __PC__
     #define printStringF printf
     int getC() { return fgetc(stdin); }
     void putC(int c) { putc(c, stdout); }
     void printString(const char *s) { fputs(s, stdout); }
-    long doUser(long ir, long pc) { return pc; }
-    long doFopen(const char *fn, int mode) { return (long)fopen(fn, mode?"wb":"rb"); }
-    void doFclose(long fh) { fclose((FILE*)fh); }
-    char *doFgets(char *buf, int sz, long fh) { return fgets(buf, sz, (FILE*)fh); }
-    int doFread(void *buf, int sz, int num, long fh) { return fread(buf, sz, num, (FILE*)fh); }
-    int doFwrite(void *buf, int sz, int num, long fh) { return fwrite(buf, sz, num, (FILE*)fh); }
-    long timerMS() { return clock(); }
-    long timerNS() { return clock() * 1000; }
+    cell_t doUser(cell_t ir, cell_t pc) { return pc; }
+    cell_t doFopen(const char *fn, int mode) { return (cell_t)fopen(fn, mode?"wb":"rb"); }
+    void doFclose(cell_t fh) { fclose((FILE*)fh); }
+    char *doFgets(char *buf, int sz, cell_t fh) { return fgets(buf, sz, (FILE*)fh); }
+    int doFread(void *buf, int sz, int num, cell_t fh) { return fread(buf, sz, num, (FILE*)fh); }
+    int doFwrite(void *buf, int sz, int num, cell_t fh) { return fwrite(buf, sz, num, (FILE*)fh); }
+    cell_t timerMS() { return clock(); }
+    cell_t timerNS() { return clock() * 1000; }
 #else
     // It's a board ...
     // #define _TEENSY4_
@@ -71,11 +81,11 @@ typedef union { float f[VARS_SZ]; int32_t i[VARS_SZ]; } ST_T;
     #define mySerial Serial
     // #define __FILES__
     // #define __GAMEPAD__
-    extern long doFopen(const char *fn, int mode);
-    extern void doFclose(long fh);
-    extern char *doFgets(char *buf, int sz, long fh);
-    extern int doFread(void* buf, int sz, int num, long fh);
-    extern int doFwrite(void* buf, int sz, int num, long fh);
+    extern cell_t doFopen(const char *fn, int mode);
+    extern void doFclose(cell_t fh);
+    extern char *doFgets(char *buf, int sz, cell_t fh);
+    extern int doFread(void* buf, int sz, int num, cell_t fh);
+    extern int doFwrite(void* buf, int sz, int num, cell_t fh);
     extern void init(int files);
     extern void Run(int start);
     extern int charAvailable();
@@ -84,12 +94,12 @@ typedef union { float f[VARS_SZ]; int32_t i[VARS_SZ]; } ST_T;
     extern void putC(int);
     extern void printString(const char *str);
     extern void printStringF(const char *fmt, ...);
-    extern long doUser(long ir, long pc);
-    extern long timerMS();
-    extern long timerNS();
+    extern cell_t doUser(cell_t ir, cell_t pc);
+    extern cell_t timerMS();
+    extern cell_t timerNS();
 
     extern uint8_t stb[];
-    extern long s, h;
+    extern cell_t s, h;
     extern ST_T st;
 #endif // __PC__
 

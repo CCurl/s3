@@ -225,20 +225,21 @@ x?FN (--a h)      a: BYTE address of FN, h: hash for "FN"
 
 
 *** INPUT/OUTPUT ***
-NNN    (--n)      Scan decimal number. For multiple numbers, separate them by space (47 33).
+0-9    (--n)      Scan NUM decimal number. For multiple numbers, separate them by space (47 33).
         NOTES: (1) To enter a negative number, use "negate" (eg - 490_).
                (2) To enter a negative floating point number, use "Fnegate" (eg - 490.34f_).
 NNNe   (--F)      Scan floating point number (e.g. - 355e)
 NN.dd  (--F)      Scan floating point number (e.g. - 3.14159)
 'x     (--n)      n: the ASCII value of x.
-hXXX   (--h)      Scan XXX as a HEX number X:[0..9 or A..F or a..f].
-b%XXX  (--h)      Scan XXX as a BINARY number X:[0..1].
+hNUM  (--h)       Scan NUM as a HEX number [0..9 or A..F].
+b%NUM (--h)       Scan NUM as a BINARY number [0..1].
 .      (N--)      Output N as decimal number.
 f.     (F--)      Output F as floating point number.
 ,      (N--)      Output N an ASCII character.
-b      (--)       Output a single SPACE.
+b      (--)       Output a single SPACE (NOTE: bit ops take precedence).
 "      (?--?)     Output a formatted string until the next '"'.
     NOTES: - %d outputs TOS as an integer
+           - %b outputs TOS as a binary number
            - %c outputs TOS as a character
            - %e outputs an ESCAPE (27)
            - %f outputs TOS as a float
@@ -246,7 +247,7 @@ b      (--)       Output a single SPACE.
            - %q outputs a QUOTE
            - %X outputs TOS as a hex number (A-F are uppercase)
            - %x outputs TOS as a hex number (A-F are lowercase)
-           - %<x> outputs <x> (eg - %% outputs %)
+           - %<x> outputs <x> (e.g. - "%%" outputs %)
 `dir`  (--)       Calls system("dir").
 xY     (A--)      Sends string at BYTE address A to system() (example: 1000#|ls|\xY).
 |XXX|  (a--b)     Copies XXX to BYTE address a, b is the next address after the NULL terminator.

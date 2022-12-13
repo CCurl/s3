@@ -7,3 +7,5 @@ sandbox
 /s3.vcxproj.user
 ht
 /.vs
+/x64/Debug
+/x64/Release

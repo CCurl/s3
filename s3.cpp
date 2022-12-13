@@ -6,9 +6,9 @@
 ST_T st;
 static char *y;
 uint8_t stb[CODE_SZ];
-int32_t locs[LOCS_SZ+10], lb, lstk[LOOP_SZ+1], lsp;
-int32_t h, sb = 4, rb = 64, r, s, t, u, fpSp;
-int32_t fn, fa, p, sd, fp, funcs[MAX_FN+1], fpStk[FILE_SZ];
+cell_t locs[LOCS_SZ+10], lb, lstk[LOOP_SZ+1], lsp;
+cell_t h, sb = 4, rb = 64, r, s, t, u, fpSp;
+cell_t fn, fa, p, sd, fp, funcs[MAX_FN+1], fpStk[FILE_SZ];
 
 void init(int files) {
     s = sb - 1; h = 1; lb = lsp = 0;
@@ -19,7 +19,7 @@ void init(int files) {
     st.i[0] = h;
 }
 int funcN(int x) {
-    int32_t hh = stb[x++];
+    cell_t hh = stb[x++];
     while (btw(stb[x], 'A', 'Z')) { hh = (hh*33) + stb[x++]; }
     fn = (hh & MAX_FN); fa = funcs[fn];
     return x;
@@ -31,8 +31,14 @@ void fOpen() { t = POP; y = (char*)&stb[TOS]; TOS = doFopen(y, t); }
 void fClose() { t = POP; if (t) { doFclose(t); } }
 void fLoad() {
     PUSH(0); fOpen(); t = POP;
-    if (t) { if (fp != (int32_t)stdin) { fpStk[++fpSp] = fp; } fp = t; }
+    if (t) { if (fp != (cell_t)stdin) { fpStk[++fpSp] = fp; } fp = t; }
     else { printString("-loadFail-"); }
+}
+void printBinary(cell_t v) {
+    char x[64], *cp=&x[63];
+    *(cp) = 0;
+    do { for (int i=0; i<4; i++) { *(--cp)=(v&1)+'0'; v/=2; } } while (v);
+    printString(cp);
 }
 void dotQ(int delim) {
     y = (char*)&stb[p];
@@ -48,6 +54,7 @@ void dotQ(int delim) {
             else if (c == 'n') { putC(13); putC(10); }
             else if (c == 'q') { putC('"'); }
             else if (c == 's') { printString((char*)&stb[POP]); }
+            else if (c == 'b') { printBinary(POP); }
             else if (c == 'X') { printStringF("%lX", POP); }
             else if (c == 'x') { printStringF("%lx", POP); }
             else { putC(c); }
@@ -90,7 +97,7 @@ void fCreate() {
     while (stb[p] != ';') {
         if (stb[p]) { if (stb[p]<32) { stb[p]=32; } ++p; }
         else {
-            if (fp == (int32_t)stdin) { printString(": "); }
+            if (fp == (cell_t)stdin) { printString(": "); }
             doFgets((char*)&stb[p], 128, fp);
         }
     }
@@ -102,7 +109,7 @@ void fEq() { NOS = (NOS == TOS) ? -1 : 0; s--; }
 void fGT() { NOS = (NOS > TOS) ? -1 : 0; s--; }
 void fLookup() { p = funcN(p); PUSH(fa); PUSH(fn); }
 void fFetch() { TOS = st.i[TOS]; }
-void doExec(int32_t addr) {
+void doExec(cell_t addr) {
     if (!addr) { printString("-noimpl-"); return; }
     if ((stb[p] != ';') && (stb[p] != '^')) { st.i[--r] = p; }
     p = addr;
@@ -181,7 +188,6 @@ void fHex() {
     while (1) {
         if (btw(stb[p], '0', '9')) { TOS = (TOS * 16) + stb[p++] - '0'; }
         else if (btw(stb[p], 'A', 'F')) { TOS = (TOS * 16) + stb[p++] - 'A' + 10; }
-        else if (btw(stb[p], 'a', 'f')) { TOS = (TOS * 16) + stb[p++] - 'a' + 10; }
         else { return; }
     }
 }
@@ -219,7 +225,7 @@ void fMOp() { u = stb[p++]; if (u == '@') { TOS = *(char*)TOS; } } // else if (u
 void fDotS() { putC('('); for (int i=sb; i<=s; i++) { if (sb<i) { putC(32); } printStringF("%ld", st.i[i]); } putC(')'); }
 void fType() { y = (char*)&stb[POP]; fputs(y, stdout); }
 void fRand() {
-    if (!sd) { sd = (int32_t)(y)+timerMS(); }
+    if (!sd) { sd = (cell_t)(y)+timerMS(); }
     sd = (sd << 13) ^ sd; sd = (sd >> 17) ^ sd; sd = (sd << 5) ^ sd;
     PUSH(sd);
 }
@@ -234,7 +240,7 @@ void fExt() {
     else if (u == ']') { u = (L0 < L1) ? 1 : 0; L0 += POP; fLoopS(u); } // +LOOP
     else if (u == '|') { PUSH(p); PUSH(0); while (stb[p++]!=u) { ++TOS; } }
     else if (u == 'L') { fLoad(); } // ABS
-    else if (u == 'Y') { TOS = (int32_t)&stb[TOS]; fSystem(); } // system
+    else if (u == 'Y') { TOS = (cell_t)&stb[TOS]; fSystem(); } // system
     else if (u == 'T') { PUSH(timerMS()); } // TIMER/MILLIS
     else if (u == 'N') { PUSH(timerNS()); } // TIMER/MICROS
     else if (u == 'U') { lsp += 3; } // UNLOOP
@@ -245,7 +251,7 @@ void fExt() {
     else if (u == 'Q') { exit(0); } // Exit s3
 }
 void fUser() { p = doUser(u, p); }
-void fZType() { TOS = (int32_t)&stb[TOS]; dotQ(0); }
+void fZType() { TOS = (cell_t)&stb[TOS]; dotQ(0); }
 void fQt() { while (stb[p] != '|') { stb[TOS++] = stb[p++]; } stb[TOS++] = 0; ++p; }
 void fLNot() { TOS = (TOS) ? 0 : -1; }
 
@@ -271,13 +277,13 @@ void Run(int x) {
 void Hist(char *s) { FILE *fp = fopen("h.txt", "at"); if (fp) { fprintf(fp, "%s", s); fclose(fp); } }
 void Loop() {
     if (feof((FILE*)fp)) {
-        if (fp == (int32_t)stdin) { exit(0); }
+        if (fp == (cell_t)stdin) { exit(0); }
         doFclose(fp);
-        fp = (0 < fpSp) ? fpStk[--fpSp] : (int32_t)stdin;
+        fp = (0 < fpSp) ? fpStk[--fpSp] : (cell_t)stdin;
     }
-    if (fp == (int32_t)stdin) { printString("\ns3:"); fDotS(); putC('>'); }
+    if (fp == (cell_t)stdin) { printString("\ns3:"); fDotS(); putC('>'); }
     y = (char*)&stb[h]; *y = 0; doFgets(y, 128, fp);
-    if (fp == (int32_t)stdin) { Hist(y); }
+    if (fp == (cell_t)stdin) { Hist(y); }
     Run(h);
 }
 int main(int argc, char* argv[]) {
@@ -291,7 +297,7 @@ int main(int argc, char* argv[]) {
     }
     if ((argc > 1) && (argv[1][0] != '-')) { fp = doFopen(argv[1], 0); }
     if (!fp) { fp = doFopen("src.s3", 0); }
-    if (!fp) { fp = (int32_t)stdin; }
+    if (!fp) { fp = (cell_t)stdin; }
     while (1) { Loop(); }
     return 0;
 }
