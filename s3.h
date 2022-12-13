@@ -4,8 +4,10 @@
 #ifdef _WIN32
     #define __PC__
     #define _CRT_SECURE_NO_WARNINGS
+    #define  CELL_T int32_t
 #elif _LINUX
     #define __PC__
+    #define  CELL_T int64_t
 #endif
 
 #include <stdio.h>
@@ -13,6 +15,10 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+
+#ifndef CELL_T
+#define CELL_T long
+#endif
 
 #define btw(a,b,c) ((b<=a) && (a<=c))
 #define STI(x)   st.i[x]
@@ -51,7 +57,7 @@
     #define MAX_FN          0x07FF
 #endif
 
-typedef int32_t cell_t;
+typedef CELL_T cell_t;
 typedef union { float f[VARS_SZ]; cell_t i[VARS_SZ]; } ST_T;
 
 #ifdef __PC__
