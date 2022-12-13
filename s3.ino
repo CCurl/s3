@@ -37,16 +37,6 @@ int32_t timerNS() { return micros(); }
     void printStringF(const char* fmt, ...) { }
 #endif // __mySerial__
 
-#ifdef __FILES__
-#include "files.h"
-#else
-int32_t doFopen(const char *fn, int mode) { return 0; }
-void doFclose(int32_t fh) { }
-char *doFgets(char *buf, int sz, int32_t fh) { *buf = 0; return buf; }
-int doFread(void* buf, int sz, int num, int32_t fh) { return 0; }
-int doFwrite(void* buf, int sz, int num, int32_t fh) { return 0; }
-#endif // __FILES__
-
 int isOTA = 0;
 
 #ifdef __GAMEPAD__

@@ -55,6 +55,9 @@
     #define LOCS_SZ             90
     #define LOOP_SZ             30
     #define MAX_FN          0x07FF
+    #define mySerial        Serial
+    #define __FILES__            2
+    // #define __GAMEPAD__
 #endif
 
 typedef CELL_T cell_t;
@@ -71,21 +74,20 @@ typedef union { float f[VARS_SZ]; cell_t i[VARS_SZ]; } ST_T;
     char *doFgets(char *buf, int sz, cell_t fh) { return fgets(buf, sz, (FILE*)fh); }
     int doFread(void *buf, int sz, int num, cell_t fh) { return fread(buf, sz, num, (FILE*)fh); }
     int doFwrite(void *buf, int sz, int num, cell_t fh) { return fwrite(buf, sz, num, (FILE*)fh); }
-    cell_t timerMS() { return clock(); }
-    cell_t timerNS() { return clock() * 1000; }
+    #ifdef _LINUX
+        cell_t timerMS() { return clock() / 1000; }
+        cell_t timerNS() { return clock(); }
+    #else
+        cell_t timerMS() { return clock(); }
+        cell_t timerNS() { return clock() * 1000; }
+    #endif
 #else
     // It's a board ...
-    // #define _TEENSY4_
-    // #define _XIAO_
-    #define _PICO_
-    #define mySerial Serial
-    // #define __FILES__
-    // #define __GAMEPAD__
     extern cell_t doFopen(const char *fn, int mode);
     extern void doFclose(cell_t fh);
     extern char *doFgets(char *buf, int sz, cell_t fh);
-    extern int doFread(void* buf, int sz, int num, cell_t fh);
-    extern int doFwrite(void* buf, int sz, int num, cell_t fh);
+    extern int doFread(void *buf, int sz, int num, cell_t fh);
+    extern int doFwrite(void *buf, int sz, int num, cell_t fh);
     extern void init(int files);
     extern void Run(int start);
     extern int charAvailable();
