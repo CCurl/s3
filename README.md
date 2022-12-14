@@ -278,10 +278,12 @@ fO    (a m--h)    Open: a=filename, m=mode (0=read, else write), h=handle (eg- 1
 fC    (h--)       Close: h=handle
 fR    (h--c n)    Read: h=handle, c=char, n=0 if error/eof, else 1
 fW    (c h--)     Write: h=handle, c=char
+fD    (a--)       a: Address of filename to delete
+fL    (--)        Output list of file names
 
 
 *** OTHER ***
-xL    (A--)       Load from file A (eg - 1000#|tests|\xL)
+xL    (NM--)      Load from file NM (eg - 1000#|tests|\xL)
 xPI   (p--)       Arduino: Pin Input  (pinMode(p, INPUT))
 xPU   (p--)       Arduino: Pin Pullup (pinMode(p, INPUT_PULLUP))
 xPO   (p--)       Arduino: Pin Output (pinMode(p, OUTPUT)

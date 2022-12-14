@@ -77,15 +77,17 @@ typedef union { float f[VARS_SZ]; cell_t i[VARS_SZ]; } ST_T;
     char *doFgets(char *buf, int sz, cell_t fh) { return fgets(buf, sz, (FILE*)fh); }
     int doFread(void *buf, int sz, int num, cell_t fh) { return fread(buf, sz, num, (FILE*)fh); }
     int doFwrite(void *buf, int sz, int num, cell_t fh) { return fwrite(buf, sz, num, (FILE*)fh); }
-    void doFdelete(const char *fn) {}
+    void doFdelete(const char* fn) { remove(fn); }
     #ifdef _LINUX
         cell_t timerMS() { return clock() / 1000; }
         cell_t timerNS() { return clock(); }
+        void doFList() { system("ls -l"); }
         int getC() { return fgetc(stdin); }
     #else
         #include <conio.h>
         int charAvailable() { return _kbhit(); }
         int getC() { return _getch(); }
+        void doFList() { system("dir"); }
         cell_t timerMS() { return clock(); }
         cell_t timerNS() { return clock() * 1000; }
     #endif
@@ -96,7 +98,8 @@ typedef union { float f[VARS_SZ]; cell_t i[VARS_SZ]; } ST_T;
     extern char *doFgets(char *buf, int sz, cell_t fh);
     extern int doFread(void *buf, int sz, int num, cell_t fh);
     extern int doFwrite(void *buf, int sz, int num, cell_t fh);
-    extern void doFdelete(const char *fn) {}
+    extern void doFList();
+    extern void doFdelete(const char* fn);
     extern void init(int files);
     extern void Run(int start);
     extern int charAvailable();
