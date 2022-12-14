@@ -240,15 +240,15 @@ b      (--)       Output a single SPACE (NOTE: bit ops take precedence).
 "      (?--?)     Output a formatted string until the next '"'.
     NOTES: - %d outputs TOS as an integer
            - %b outputs TOS as a binary number
+           - %B outputs NOS as a number in base TOS (e.g. - 1234 8"%B")
            - %c outputs TOS as a character
            - %e outputs an ESCAPE (27)
            - %f outputs TOS as a float
            - %n outputs CR/LF
            - %q outputs a QUOTE
-           - %X outputs TOS as a hex number (A-F are uppercase)
-           - %x outputs TOS as a hex number (A-F are lowercase)
+           - %x outputs TOS as a hex number (A-F are uppercase)
            - %<x> outputs <x> (e.g. - "%%" outputs %)
-`dir`  (--)       Calls system("dir").
+`XXX`  (--)       Calls system("XXX"). (e.g. - `ls -l`)
 xY     (A--)      Sends string at BYTE address A to system() (example: 1000#|ls|\xY).
 |XXX|  (a--b)     Copies XXX to BYTE address a, b is the next address after the NULL terminator.
 x|XXX| (--a n)    a: BYTE address, n:number of chars.

@@ -5,9 +5,11 @@
     #define __PC__
     #define _CRT_SECURE_NO_WARNINGS
     #define  CELL_T int32_t
+    #define  UCELL_T uint32_t
 #elif _LINUX
     #define __PC__
-    #define  CELL_T int64_t
+    #define  CELL_T int32_t
+    #define  UCELL_T uint32_t
 #endif
 
 #include <stdio.h>
@@ -18,6 +20,7 @@
 
 #ifndef CELL_T
 #define CELL_T long
+#define UCELL_T unsigned long
 #endif
 
 #define btw(a,b,c) ((b<=a) && (a<=c))
@@ -61,11 +64,11 @@
 #endif
 
 typedef CELL_T cell_t;
+typedef UCELL_T ucell_t;
 typedef union { float f[VARS_SZ]; cell_t i[VARS_SZ]; } ST_T;
 
 #ifdef __PC__
     #define printStringF printf
-    int getC() { return fgetc(stdin); }
     void putC(int c) { putc(c, stdout); }
     void printString(const char *s) { fputs(s, stdout); }
     cell_t doUser(cell_t ir, cell_t pc) { return pc; }
@@ -74,10 +77,15 @@ typedef union { float f[VARS_SZ]; cell_t i[VARS_SZ]; } ST_T;
     char *doFgets(char *buf, int sz, cell_t fh) { return fgets(buf, sz, (FILE*)fh); }
     int doFread(void *buf, int sz, int num, cell_t fh) { return fread(buf, sz, num, (FILE*)fh); }
     int doFwrite(void *buf, int sz, int num, cell_t fh) { return fwrite(buf, sz, num, (FILE*)fh); }
+    void doFdelete(const char *fn) {}
     #ifdef _LINUX
         cell_t timerMS() { return clock() / 1000; }
         cell_t timerNS() { return clock(); }
+        int getC() { return fgetc(stdin); }
     #else
+        #include <conio.h>
+        int charAvailable() { return _kbhit(); }
+        int getC() { return _getch(); }
         cell_t timerMS() { return clock(); }
         cell_t timerNS() { return clock() * 1000; }
     #endif
@@ -88,6 +96,7 @@ typedef union { float f[VARS_SZ]; cell_t i[VARS_SZ]; } ST_T;
     extern char *doFgets(char *buf, int sz, cell_t fh);
     extern int doFread(void *buf, int sz, int num, cell_t fh);
     extern int doFwrite(void *buf, int sz, int num, cell_t fh);
+    extern void doFdelete(const char *fn) {}
     extern void init(int files);
     extern void Run(int start);
     extern int charAvailable();
