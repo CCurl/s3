@@ -180,7 +180,7 @@ void fFloat() {
     else if (u == 'O') { fOpen(); }
     else if (u == 'C') { fClose(); }
     else if (u == 'D') { doFdelete((char*)POP); }
-    else if (u == 'L') { doFList(); }
+    else if (u == 'L') { doFlist(); }
     else if (u == 'R') {
         t = TOS; TOS = 0; PUSH(0);
         if (t) { TOS = doFread((void*)&NOS, 1, 1, t); }
