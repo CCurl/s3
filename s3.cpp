@@ -35,7 +35,7 @@ void fLoad() {
     else { printString("-loadFail-"); }
 }
 void printBase(cell_t v, int b) {
-    char x[64], *c=&x[63], n=((v<0) && (b==10))?1:0;
+    char x[65], *c=&x[64], n=((v<0) && (b==10))?1:0;
     ucell_t u=(n)?-v:v;
     *(c) = 0;
     do { *(--c)=(u%b)+'0'; if (*c>'9') *c+=7; u/=b; } while (u);

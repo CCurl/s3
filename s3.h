@@ -8,8 +8,8 @@
     #define  UCELL_T uint32_t
 #elif _LINUX
     #define __PC__
-    #define  CELL_T int32_t
-    #define  UCELL_T uint32_t
+    #define  CELL_T int64_t
+    #define  UCELL_T uint64_t
 #endif
 
 #include <stdio.h>
@@ -83,6 +83,7 @@ typedef union { float f[VARS_SZ]; cell_t i[VARS_SZ]; } ST_T;
         cell_t timerNS() { return clock(); }
         void doFList() { system("ls -l"); }
         int getC() { return fgetc(stdin); }
+        int charAvailable() { return 0; }
     #else
         #include <conio.h>
         int charAvailable() { return _kbhit(); }
