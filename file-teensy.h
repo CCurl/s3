@@ -21,13 +21,6 @@ void fileInit() {
     printStringF("\r\nBytes Used: %llu, Bytes Total:%llu", myFS.usedSize(), myFS.totalSize());
 }
 
-int freeFile() {
-    for (int i = 1; i <= MAX_FILES; i++) {
-        if (!files[i]) { return i; }
-    }
-    return 0;
-}
-
 cell_t doFopen(const char *fn, int mode) {
     int fh = 0;
     for (int i = 1; (i<=MAX_FILES) & (fh==0); i++) {
