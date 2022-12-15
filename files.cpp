@@ -14,15 +14,9 @@ void doFdelete(const char* fn) {}
 
 #elif  __FILES__ == 2 // TEENSY4
 
-cell_t doFopen(const char* fn, int mode) { return 0; }
-void doFclose(cell_t fh) {}
-char* doFgets(char* buf, int sz, cell_t fh) { return 0; }
-int doFread(void* buf, int sz, int num, cell_t fh) { return 0; }
-int doFwrite(void* buf, int sz, int num, cell_t fh) { return 0; }
-void doFList() {}
-void doFdelete(const char* fn) {}
+#include "file-teensy.h"
 
-#elif  __FILES__ == 2 // PICO
+#elif  __FILES__ == 3 // PICO
 
 cell_t doFopen(const char* fn, int mode) { return 0; }
 void doFclose(cell_t fh) {}
