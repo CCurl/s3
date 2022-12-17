@@ -32,12 +32,13 @@
     int doFwrite(void *buf, int sz, int num, cell_t fh) { return fwrite(buf, sz, num, (FILE*)fh); }
     void doFdelete(const char* fn) { remove(fn); }
     #ifdef _LINUX
+        #include <unistd.h>
         cell_t timerMS() { return clock() / 1000; }
         cell_t timerNS() { return clock(); }
         void doFlist() { system("ls -l"); }
         int getC() { return fgetc(stdin); }
         int charAvailable() { return 0; }
-        void delay(cell_t ms) { printString("-delay:todo-"); }
+        void delay(cell_t ms) { usleep(ms*1000); }
     #else
         #include <conio.h>
         #include <Windows.h>
