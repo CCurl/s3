@@ -65,7 +65,15 @@ void dotQ(int delim) {
     }
     if (delim) { ++p; }
 }
-void fStore() { st.i[TOS] = NOS; s -= 2; }
+#ifdef NEEDS_ALIGN
+void setCell() { *(cell_t*)&st.[TOS] = NOS }
+cell_t getCell() { return *(cell_t*)&st.[TOS] = NOS }
+#else
+void setCell(cell_t a, cell_t v) { *(cell_t*)&STB(a) = v; }
+cell_t getCell(cell_t a) { return *(cell_t*)&STB(a); }
+#endif
+void fStore() { setCell(TOS, NOS); s -= 2; }
+void fFetch() { TOS = getCell(TOS); }
 void fDotQ() { dotQ('"'); }
 void fDup() { t = TOS; PUSH(t); }
 void fSwap() { t = TOS; TOS = NOS; NOS = t; }
@@ -90,12 +98,16 @@ void n09() {
         while (btw(stb[p],'0','9')) { FTOS+=(stb[p++]-'0')/d; d*=10; }
     }
 }
+void fVar() { p = funcN(p); PUSH(fa); }
 void fCreate() {
+    cell_t cur = p, isVar = 0;
+    if (stb[p] == 'v') { isVar = 1; ++p; }
     if (stb[p] == '_') { PUSH(++p); u=0; }
-    else { p = funcN(p); }
-    if (u && fa) { printStringF("-redef:%ld to %ld,hash(%ld)-", fa, p, fn); }
+    if (u) { p = funcN(p); }
+    if (u && fa) { printStringF("-redef:%ld to %ld,hash(%ld)-", fa, cur, fn); }
     while (stb[p] == ' ') { ++p; }
-    if (u) { funcs[fn] = p; }
+    if (isVar) { funcs[fn] = POP; }
+    else if (u) { funcs[fn] = p; }
     while (stb[p] != ';') {
         if (stb[p]) { if (stb[p]<32) { stb[p]=32; } ++p; }
         else {
@@ -110,7 +122,6 @@ void fLT() { NOS = (NOS < TOS) ? -1 : 0; s--; }
 void fEq() { NOS = (NOS == TOS) ? -1 : 0; s--; }
 void fGT() { NOS = (NOS > TOS) ? -1 : 0; s--; }
 void fLookup() { p = funcN(p); PUSH(fa); PUSH(fn); }
-void fFetch() { TOS = st.i[TOS]; }
 void doExec(cell_t addr) {
     if (!addr) { printString("-noimpl-"); return; }
     if ((stb[p] != ';') && (stb[p] != '^')) { st.i[--r] = p; }
@@ -215,11 +226,13 @@ void fRegGet() {
     u = stb[p++]; PUSH(0);
     if (btw(u, 'A', 'Z')) { TOS = st.i[u]; }
     else if (btw(u, '0', '9')) { TOS = locs[lb + u - '0']; }
+    else if (u == '@') { --s; TOS = STI(TOS); }
 }
 void fRegSet() {
     u = stb[p++]; t = POP;
     if (btw(u, 'A', 'Z')) { st.i[u] = t; }
     else if (btw(u, '0', '9')) { locs[lb + u - '0'] = t; }
+    else if (u=='!') { st.i[t] = POP; }
 }
 void fKey() {
     u = stb[p++]; if (u == '?') { PUSH(charAvailable()); /*TODO!*/ }
@@ -266,7 +279,7 @@ void (*jmpTbl[128])() = {
     fFetch,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,                                    //  64:79
     AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,fDo,fDrop,fLoop,fLeave,fNeg,                           //  80:95
     fSys,fAbs,fBit,fCOp,fRegDec,X,fFloat,X,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,          //  96:111
-    X,fROp,fRegGet,fRegSet,fType,fUser,X,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };   // 112:127
+    X,fROp,fRegGet,fRegSet,fType,fUser,fVar,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };   // 112:127
 
 void Run(int x) { 
     s=(s<sb)?(sb-1):s; r=rb; lsp=0; p=x;

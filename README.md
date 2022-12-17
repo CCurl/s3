@@ -179,15 +179,17 @@ fT    (a--n)      n: TANH(a)
 
 
 *** MEMORY ***
-        NOTES: - There are 3 memory areas in s3: CELL, CODE, and ABSOLUTE.
+        NOTES: - There are 3 memory areas in s3: CELL, BYTE, and ABSOLUTE.
                - An address in CELL memory is an index into an array of CELLs (32- or 64-bit).
                - An address in BYTE memory is an index into an array of BYTES.
                - An address in ABSOLUTE memory is an address in the system's memory.
                - BYTE memory is used for CODE as well. Code starts at address 1.
                - To get the last allocated CODE address, use 0@.
                - s3 uses CELL addresses 0-99. All addresses above that are free to use.
-@     (a--n)      Fetch CELL n from CELL address a.
-!     (n a--)     Store CELL n to CELL address a.
+s@    (a--n)      Fetch CELL n from CELL address a.
+s!    (n a--)     Store CELL n to CELL address a.
+@     (a--n)      Fetch CELL n from BYTE address a.
+!     (n a--)     Store CELL n to BYTE address a.
 c@    (a--b)      Fetch BYTE b from BYTE address a.
 c!    (b a--)     Store BYTE b to BYTE address a.
 w@    (a--w)      Fetch WORD w from BYTE address a.
