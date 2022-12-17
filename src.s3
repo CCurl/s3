@@ -23,6 +23,7 @@ xX 0(reset s3)
 :_"-anonynous A-"; 'A JTSET
 :_"-anonynous B-"; 'B JTSET
 :RELOAD 1000#|src.s3|\xL;
+:FILESZ l+ 0s8 0fO{#fR$\#(i8)}fC r8 l-;
 VER
 123 sA 44567 sZ
 CR 345.678 f. " (sb-345.678)"
@@ -38,3 +39,4 @@ CR MULTI
 CR 'A JTEXEC 'B JTEXEC
 CR CR CODE CR
 0(xQ)
+0@1000+#|src.s3|\FILESZ"%n%d bytes in src.s3"

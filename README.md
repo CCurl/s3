@@ -12,18 +12,18 @@ s3 ...
 ... supports locals, 10 at a time, [r0..r9].
 ... supports floating point math.
 ... supports file operations, open, read, write, close, load.
-... supports up to CODE_SZ (default is 64K) bytes.
-... supports up to VARS_SZ (default is 64K) longs.
+... supports up to CODE_SZ (default is 1 MB) bytes.
+... supports up to VARS_SZ (default is 1 MB) cells (32- or 64-bit).
 ... supports variable-length function names.
-... supports multi-line words.
-... supports anonymous words.
-... supports up to MAX_FN (default is 2048) words.
+... supports up to MAX_FN (default is 4096) functions.
+... supports multi-line functions.
+... supports anonymous functions.
 ... runs under Windows
 ... runs under Linux
 ... runs on development boards via the Arduino IDE
 ```
 ## Why s3?
-Many interpreted environments have a large SWITCH statement with cases in a loop to execute the user's program. In these systems, the "virtual machine language" opcodes (the cases in the SWITCH statement) are often arbitrarily assigned and are not human-readable, so they have no meaning to the programmer when looking at the code that is actually being executed. Additionally a compiler and/or interpreter are included to create and execute the programs in that environment. In these enviromnents, there is a steep learning curve ... the programmer needs to learn the programming language, the hundreds (or thousands) of user functions in the libraries (or "WORDS" in Forth), how to use the compiler, and how to use the interpreter. I wanted to avoid as much as that as possible, and have only one thing to learn: the "virtual machine language".
+Many interpreted environments have a large SWITCH statement with cases in a loop to execute the user's program. In these systems, the "virtual machine language" opcodes (the cases in the SWITCH statement) are often arbitrarily assigned and are not human-readable, so they have no meaning to the programmer when looking at the code that is actually being executed. Additionally, a compiler and/or interpreter are needed to create and execute programs in that environment. In those enviromnents, there is a steep learning curve ... the programmer needs to learn the programming language, the hundreds (or thousands) of user functions in the libraries (or "WORDS" in Forth), how to use the compiler, and how to use the interpreter. I wanted to avoid as much as that as possible, and have only one thing to learn: the "virtual machine language".
 
 ## Goals for s3
 1. Freedom from a multiple gigabyte tool chain and the edit/compile/run paradigm for developing everyday programs.
@@ -161,13 +161,13 @@ q> (--n)          Move return stack TOS back       (Forth: R>)
 
 *** FLOATING POINT ***
 123e  (--F)       F: 123 as a floating point number
-12.34 (--F)       F: 123.45
+12.34 (--F)       F: 12.34
 ff    (n--F)      n: integer, F: float
 fi    (F--n)      F: float, n: integer
 f_    (F--N)      N: -F (Negate)
 f.    (F--)       Output F
-f@    (a--F)      Fetch float F from address a
-f!    (F a--)     Store float F to address a
+f@    (a--F)      Fetch float F from CELL address a
+f!    (F a--)     Store float F to CELL address a
 f+    (a b--n)    n: a+b - addition
 f-    (a b--n)    n: a-b - subtraction
 f*    (a b--n)    n: a*b - multiplication
@@ -180,11 +180,12 @@ fT    (a--n)      n: TANH(a)
 
 *** MEMORY ***
         NOTES: - There are 3 memory areas in s3: CELL, CODE, and ABSOLUTE.
-               - An address in CELL memory is an index into an array of LONGS.
+               - An address in CELL memory is an index into an array of CELLs (32- or 64-bit).
                - An address in BYTE memory is an index into an array of BYTES.
                - An address in ABSOLUTE memory is an address in the system's memory.
                - BYTE memory is used for CODE as well. Code starts at address 1.
                - To get the last allocated CODE address, use 0@.
+               - s3 uses CELL addresses 0-99. All addresses above that are free to use.
 @     (a--n)      Fetch CELL n from CELL address a.
 !     (n a--)     Store CELL n to CELL address a.
 c@    (a--b)      Fetch BYTE b from BYTE address a.
@@ -212,8 +213,8 @@ dC    (--)        Decrement register C.
 
 
 *** WORDS/FUNCTIONS ***
-        NOTES: Word names are variable-length UPPERCASE words.
-               Word "_" is the NONAME word (can be used to create jump-tables).
+        NOTES: Function/word names are variable-length UPPERCASE words.
+               Use ":_ 0(code);" to create a function with no name.
 :ABCD (--)        Define word ABCD. Skip until next ';'.
 :_    (--A)       Define an anonymous word. A: current HERE. Skip until next ';'.
 ABCD  (--)        Execute/call word ABCD.
@@ -240,15 +241,15 @@ b      (--)       Output a single SPACE (NOTE: bit ops take precedence).
 "      (?--?)     Output a formatted string until the next '"'.
     NOTES: - %d outputs TOS as an integer
            - %b outputs TOS as a binary number
+           - %B outputs NOS as a number in base TOS (e.g. - 1234 8"%B")
            - %c outputs TOS as a character
            - %e outputs an ESCAPE (27)
            - %f outputs TOS as a float
            - %n outputs CR/LF
            - %q outputs a QUOTE
-           - %X outputs TOS as a hex number (A-F are uppercase)
-           - %x outputs TOS as a hex number (A-F are lowercase)
+           - %x outputs TOS as a hex number (A-F are uppercase)
            - %<x> outputs <x> (e.g. - "%%" outputs %)
-`dir`  (--)       Calls system("dir").
+`XXX`  (--)       Calls system("XXX"). (e.g. - `ls -l`)
 xY     (A--)      Sends string at BYTE address A to system() (example: 1000#|ls|\xY).
 |XXX|  (a--b)     Copies XXX to BYTE address a, b is the next address after the NULL terminator.
 x|XXX| (--a n)    a: BYTE address, n:number of chars.
@@ -267,7 +268,7 @@ k@     (--c)      TODO: c: next character from the input buffer. If no character
 n     (--n)       n: the index of the current DO loop
 ]     (--)        LOOP: increment index (n) and stop if (T<=n)
 x]    (N--)       +LOOP: Add N to the index (n) and stop if (n==T) or (n crosses T)
-{     (--)        BEGIN While loop
+{     (--)        Start a BEGIN/WHILE loop
 }     (f--)       WHILE: if (f != 0) jump back to BEGIN, else continue
 xU    (--)        UNLOOP: Unwind the LOOP stack (either DO or WHILE loops, use with '^')
 (     (f--)       IF: if (f == 0), skip to next ')'.
@@ -278,10 +279,12 @@ fO    (a m--h)    Open: a=filename, m=mode (0=read, else write), h=handle (eg- 1
 fC    (h--)       Close: h=handle
 fR    (h--c n)    Read: h=handle, c=char, n=0 if error/eof, else 1
 fW    (c h--)     Write: h=handle, c=char
+fD    (a--)       a: Address of filename to delete
+fL    (--)        Output list of file names
 
 
 *** OTHER ***
-xL    (A--)       Load from file A (eg - 1000#|tests|\xL)
+xL    (NM--)      Load from file NM (eg - 1000#|tests|\xL)
 xPI   (p--)       Arduino: Pin Input  (pinMode(p, INPUT))
 xPU   (p--)       Arduino: Pin Pullup (pinMode(p, INPUT_PULLUP))
 xPO   (p--)       Arduino: Pin Output (pinMode(p, OUTPUT)

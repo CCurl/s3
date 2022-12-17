@@ -34,11 +34,13 @@ void fLoad() {
     if (t) { if (fp != (cell_t)stdin) { fpStk[++fpSp] = fp; } fp = t; }
     else { printString("-loadFail-"); }
 }
-void printBinary(cell_t v) {
-    char x[64], *cp=&x[63];
-    *(cp) = 0;
-    do { for (int i=0; i<4; i++) { *(--cp)=(v&1)+'0'; v/=2; } } while (v);
-    printString(cp);
+void printBase(cell_t v, int b) {
+    char x[65], *c=&x[64], n=((v<0) && (b==10))?1:0;
+    ucell_t u=(n)?-v:v;
+    *(c) = 0;
+    do { *(--c)=(u%b)+'0'; if (*c>'9') *c+=7; u/=b; } while (u);
+    if (n) { *(--c)='-'; }
+    printString(c);
 }
 void dotQ(int delim) {
     y = (char*)&stb[p];
@@ -47,16 +49,16 @@ void dotQ(int delim) {
         char c = *(y++); if (delim) { ++p; }
         if (c == '%') {
             c = *(y++); if (delim) { ++p; }
-            if (c == 'd') { printStringF("%ld", POP); }
+            if (c == 'd') { printBase(POP, 10); }
             else if (c == 'c') { putC((int)POP); }
             else if (c == 'e') { putC(27); }
             else if (c == 'f') { printStringF("%g", st.f[s--]); }
             else if (c == 'n') { putC(13); putC(10); }
             else if (c == 'q') { putC('"'); }
             else if (c == 's') { printString((char*)&stb[POP]); }
-            else if (c == 'b') { printBinary(POP); }
-            else if (c == 'X') { printStringF("%lX", POP); }
-            else if (c == 'x') { printStringF("%lx", POP); }
+            else if (c == 'B') { t = POP; printBase(POP, t); }
+            else if (c == 'b') { printBase(POP, 2); }
+            else if (c == 'x') { printBase(POP, 16); }
             else { putC(c); }
         }
         else { putC(c); }
@@ -71,7 +73,7 @@ void fOver() { t = NOS; PUSH(t); }
 void fDrop() { --s; }
 void fSlMod() { u = NOS; t = TOS; NOS = u / t; TOS = u % t; }
 void fAscii() { PUSH(stb[p++]); }
-void fDot() { printStringF("%ld", POP); }
+void fDot() { printBase(POP, 10); }
 void fEmit() { putC(POP); }
 void fIf() { if (POP == 0) { while (stb[p++] != ')'); } }
 void fAdd() { NOS += TOS; s--; }
@@ -177,6 +179,8 @@ void fFloat() {
     else if (u == 'T') { FTOS = (float)tanh(FTOS); }
     else if (u == 'O') { fOpen(); }
     else if (u == 'C') { fClose(); }
+    else if (u == 'D') { doFdelete((char*)POP); }
+    else if (u == 'L') { doFlist(); }
     else if (u == 'R') {
         t = TOS; TOS = 0; PUSH(0);
         if (t) { TOS = doFread((void*)&NOS, 1, 1, t); }
@@ -218,11 +222,11 @@ void fRegSet() {
     else if (btw(u, '0', '9')) { locs[lb + u - '0'] = t; }
 }
 void fKey() {
-    u = stb[p++]; if (u == '?') { PUSH(0); /*TODO!*/ }
+    u = stb[p++]; if (u == '?') { PUSH(charAvailable()); /*TODO!*/ }
     else if (u == '@') { PUSH(getC()); }
 }
 void fMOp() { u = stb[p++]; if (u == '@') { TOS = *(char*)TOS; } } // else if (u=='!') { *(char*)TOS=(char)NOS; s-=2; } }
-void fDotS() { putC('('); for (int i=sb; i<=s; i++) { if (sb<i) { putC(32); } printStringF("%ld", st.i[i]); } putC(')'); }
+void fDotS() { putC('('); for (int i=sb; i<=s; i++) { if (sb<i) { putC(32); } printBase(st.i[i],10); } putC(')'); }
 void fType() { y = (char*)&stb[POP]; fputs(y, stdout); }
 void fRand() {
     if (!sd) { sd = (cell_t)(y)+timerMS(); }
