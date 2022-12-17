@@ -248,7 +248,7 @@ void fExt() {
     else if (u == 'T') { PUSH(timerMS()); } // TIMER/MILLIS
     else if (u == 'N') { PUSH(timerNS()); } // TIMER/MICROS
     else if (u == 'U') { lsp += 3; } // UNLOOP
-    else if (u == 'W') { printStringF("-wait:%ld-", POP); } // WAIT
+    else if (u == 'W') { delay(POP); } // WAIT
     else if (u == 'S') { fDotS(); }
     else if (u == '?') { fLookup(); }
     else if (u == 'X') { init(0); p=0; } // Reset

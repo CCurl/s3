@@ -37,13 +37,16 @@
         void doFlist() { system("ls -l"); }
         int getC() { return fgetc(stdin); }
         int charAvailable() { return 0; }
+        void delay(cell_t ms) { printString("-delay:todo-"); }
     #else
         #include <conio.h>
+        #include <Windows.h>
         int charAvailable() { return _kbhit(); }
         int getC() { return _getch(); }
         void doFlist() { system("dir"); }
         cell_t timerMS() { return clock(); }
         cell_t timerNS() { return clock() * 1000; }
+        void delay(cell_t ms) { Sleep(ms); }
     #endif
 #else
     // It's a board ...
