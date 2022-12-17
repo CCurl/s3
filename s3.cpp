@@ -209,6 +209,8 @@ void fHex() {
 void fLoc() {
     u = stb[p++]; if (u == '+') { lb += (lb < LOCS_SZ) ? 10 : 0; }
     else if (u == '-') { lb -= (0<lb) ? 10 : 0; }
+    else if (u == '@') { TOS = STI(TOS); }
+    else if (u == '!') { st.i[TOS] = NOS; s -= 2; }
 }
 void fRegDec() {
     u = stb[p++];
@@ -226,13 +228,11 @@ void fRegGet() {
     u = stb[p++]; PUSH(0);
     if (btw(u, 'A', 'Z')) { TOS = st.i[u]; }
     else if (btw(u, '0', '9')) { TOS = locs[lb + u - '0']; }
-    else if (u == '@') { --s; TOS = STI(TOS); }
 }
 void fRegSet() {
-    u = stb[p++]; t = POP;
-    if (btw(u, 'A', 'Z')) { st.i[u] = t; }
-    else if (btw(u, '0', '9')) { locs[lb + u - '0'] = t; }
-    else if (u=='!') { st.i[t] = POP; }
+    u = stb[p++];
+    if (btw(u, 'A', 'Z')) { st.i[u] = POP; }
+    else if (btw(u, '0', '9')) { locs[lb + u - '0'] = POP; }
 }
 void fKey() {
     u = stb[p++]; if (u == '?') { PUSH(charAvailable()); /*TODO!*/ }

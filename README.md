@@ -186,12 +186,12 @@ fT    (a--n)      n: TANH(a)
                - BYTE memory is used for CODE as well. Code starts at address 1.
                - To get the last allocated CODE address, use 0@.
                - s3 uses CELL addresses 0-99. All addresses above that are free to use.
-s@    (a--n)      Fetch CELL n from CELL address a.
-s!    (n a--)     Store CELL n to CELL address a.
+l@    (a--n)      Fetch CELL n from CELL address a (long fetch).
+l!    (n a--)     Store CELL n to CELL address a (long store).
 @     (a--n)      Fetch CELL n from BYTE address a.
 !     (n a--)     Store CELL n to BYTE address a.
-c@    (a--b)      Fetch BYTE b from BYTE address a.
-c!    (b a--)     Store BYTE b to BYTE address a.
+c@    (a--b)      Fetch BYTE b from BYTE address a (char fetch).
+c!    (b a--)     Store BYTE b to BYTE address a (char store).
 w@    (a--w)      Fetch WORD w from BYTE address a.
 w!    (w a--)     Store WORD w to BYTE address a.
 m@    (a--b)      Fetch BYTE b from ABSOLUTE address a.
@@ -217,14 +217,25 @@ dC    (--)        Decrement register C.
 *** WORDS/FUNCTIONS ***
         NOTES: Function/word names are variable-length UPPERCASE words.
                Use ":_ 0(code);" to create a function with no name.
-:ABCD (--)        Define word ABCD. Skip until next ';'.
+:FUNC (--)        Define word FUNC. Skip until next ';'.
 :_    (--A)       Define an anonymous word. A: current HERE. Skip until next ';'.
-ABCD  (--)        Execute/call word ABCD.
+FUNC  (--)        Execute/call word FUNC.
 ;     (--)        End of word definition. Exits word at run-time.
 ^     (--)        Exit word immediately.
         NOTE: To exit a word while inside of a loop, use 'xU^'.
               example: :LOOPTEST 100 0[n.b n71=("-out" xU^)", "];
 x?FN (--a h)      a: BYTE address of FN, h: hash for "FN"
+
+
+*** VARIABLES/CONSTANTS ***
+        NOTES: Variable/constant names are variable-length UPPERCASE words starting with 'v'.
+               The same hash table is used for constant and function names.
+               A variable reference is really just a CONSTANT interpreted as an address.
+               vFUNCNAME will push the execution address of FUNCNAME on the stack.
+N:vXYZ; (N--)     N: Define variable address/constant vXYZ to be N.
+vXYZ    (--N)     N: value/address of vXYZ.
+vFUNC   (--N)     N: execution address of FUNC.
+XYZ     (--)      Execute the code at the address referred to by vXYZ.
 
 
 *** INPUT/OUTPUT ***
