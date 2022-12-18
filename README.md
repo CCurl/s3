@@ -72,16 +72,16 @@ Many interpreted environments have a large SWITCH statement with cases in a loop
 
 ; A simple benchmark for a 100 million FOR/NEXT (aka - DO/LOOP) loop:
     :MIL 1000 # * *;
-    :BENCH 0(n--) xT $ 0[] xT $ -;
-    100 MIL BENCH . "usec"
+    :BENCH 0(n--) xT $ 0[] xT $ - . "ms";
+    100 MIL BENCH
 
 ; A simple benchmark for a 100 million WHILE loop:
     :MIL 1000#**;
-    :BENCH 0(n--) xT${d#}\xT$-." usec";
-    100 MIL BENCH ." usec" 0(note that spaces are optional)
+    :BENCH 0(n--) xT${d#}\xT$-"%dms";
+    100 MIL BENCH 0(note that spaces are optional)
 
 ; Define a word to display the currently defined code:
-    :CODE 0(--) 0@1[nc@#58=(n1-c@59=(13,10,),];
+    :CODE 0l@1[nc@#58=(ndc@59=("%n"),];
 
 ; x = (a == b) ? c : d;
     s3 code:          rA rB=#(rC$)~(rD)sX;
@@ -113,9 +113,9 @@ Many interpreted environments have a large SWITCH statement with cases in a loop
     rA rB rN Copy
 
 ; Creating a jump-table using anonymous words
-    :JUMPTABLE 10000;
-    :JTSET  0(a n--) JUMPTABLE+!;
-    :JTGET  0(n--a)  JUMPTABLE+@;
+    10000:vJUMPTABLE;
+    :JTSET  0(a n--) 1l@*vJUMPTABLE+!;
+    :JTGET  0(n--a)  1l@*vJUMPTABLE+@;
     :JTEXEC 0(n--)   JTGETq<;
     :_"-this is A-"; 'A JTSET
     :_"-this is B-"; 'B JTSET
@@ -270,8 +270,8 @@ xY     (A--)      Sends string at BYTE address A to system() (example: 1000#|ls|
 x|XXX| (--a n)    a: BYTE address of XXX, n:number of chars.
 z      (a--)      ZTYPE: Output the formatted string at BYTE address a (see ").
 t      (a--)      TYPE: Output the NULL-terminated string at BYTE address a (faster, no formatting).
-k?     (--f)      TODO: f: 1 if a character is waiting in the input buffer, else 0.
-k@     (--c)      TODO: c: next character from the input buffer. If no character, wait.
+k?     (--f)      f: 1 if a character is waiting in the input buffer, else 0. (TODO: Linux)
+k@     (--c)      c: next character from the input buffer. If no character, wait. (TODO: Linux)
 
 
 *** CONDITIONS/LOOPS/FLOW CONTROL ***
@@ -299,20 +299,20 @@ fL    (--)        Output list of file names
 
 
 *** OTHER ***
-1 l@  (--N)       N: size of a CELL (32-bit: 4, 64-bit: 8)
-xL    (NM--)      Load from file NM (eg - 1000#|tests|\xL)
-xPI   (p--)       Arduino: Pin Input  (pinMode(p, INPUT))
-xPU   (p--)       Arduino: Pin Pullup (pinMode(p, INPUT_PULLUP))
-xPO   (p--)       Arduino: Pin Output (pinMode(p, OUTPUT)
+1 l@  (--N)       N: size of a CELL in bytes.
+xL    (NM--)      Load from file NM (eg - 0 l@ 10+#|tests|\xL)
+xPI   (p--)       Arduino: Open Pin Input (pinMode(p, INPUT))
+xPU   (p--)       Arduino: Open Pin Pullup (pinMode(p, INPUT_PULLUP))
+xPO   (p--)       Arduino: Open Pin Output (pinMode(p, OUTPUT)
 xPRA  (p--n)      Arduino: Pin Read Analog  (n = analogRead(p))
 xPRD  (p--n)      Arduino: Pin Read Digital (n = digitalRead(p))
 xPWA  (n p--)     Arduino: Pin Write Analog  (analogWrite(p, n))
 xPWD  (n p--)     Arduino: Pin Write Digital (digitalWrite(p, n))
-xR    (--r)       r: a random 32-bit number
-xT    (--n)       Milliseconds (Arduino: millis(), Windows/Linux: clock())
-xN    (--n)       Microseconds (Arduino: micros(), Windows/Linux: clock())
-xW    (n--)       TODO: Wait (Arduino: delay(),  Windows: Sleep())
-0@    (--n)       Value of HERE variable
+xR    (--N)       N: a random 32-bit number
+xT    (--n)       n: Current Milliseconds (Arduino: millis())
+xN    (--n)       n: Current Microseconds (Arduino: micros())
+xW    (n--)       n: MS to wait (Arduino: delay(),  Windows: Sleep(), Linux: usleep())
+0@    (--n)       n: Value of HERE variable
 xX    (--)        s3 system reset/clear.
 xQ    (--)        PC: Exit s3
 ```
