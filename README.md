@@ -145,6 +145,9 @@ b~  (a--b)        b: NOT a (ones-complement, e.g - 101011 => 010100)
 
 
 *** STACK ***
+        NOTES: - The stacks are located in CELL addresses 4-64.
+               - The data/parameter stack starts at 4 and grows upward.
+               - The return stack starts at 64 and grows downward.
 #  (a--a a)       Duplicate TOS                    (Forth: DUP)
 \  (a b--a)       Drop TOS                         (Forth: DROP)
 $  (a b--b a)     Swap top 2 stack items           (Forth: SWAP)
@@ -183,9 +186,12 @@ fT    (a--n)      n: TANH(a)
                - An address in CELL memory is an index into an array of CELLs (32- or 64-bit).
                - An address in BYTE memory is an index into an array of BYTES.
                - An address in ABSOLUTE memory is an address in the system's memory.
+               - The stacks use CELL addresses 4->64.
+               - The registers CELL addresses 65->90.
+               - CELL addresses 91->VARS_SZ are free.
                - BYTE memory is used for CODE as well. Code starts at address 1.
-               - To get the last allocated CODE address, use 0@.
-               - s3 uses CELL addresses 0-99. All addresses above that are free to use.
+               - To get the last allocated CODE address (aka - HERE), use 0 l@.
+               - To size of a CELL in bytes, use 1 l@.
 l@    (a--n)      Fetch CELL n from CELL address a (long fetch).
 l!    (n a--)     Store CELL n to CELL address a (long store).
 @     (a--n)      Fetch CELL n from BYTE address a.
@@ -199,39 +205,35 @@ m!    (b a--)     Store BYTE b to ABSOLUTE address a.
 
 
 *** REGISTERS and LOCALS ***
-        NOTES: - s3 allocates 10 locals at a time, [r0..r9].
-               - Register names are 1 UPPERCASE character: [A..Z].
-               - Registers are stored in CELL addresses 65-91 (rA='A@, rZ='Z@).
+        NOTES: - Register names are 1 UPPERCASE character: [A..Z].
+               - Registers are stored in CELL addresses 65-90 (rA='Al@, rZ='Zl@).
+               - s3 allocates 10 locals at a time, [r0..r9].
+rX    (--n)       n: value of register/local #3.
+sX    (n--)       n: value to store in register/local #3.
+iX    (--)        Increment register/local #3.
+dX    (--)        Decrement register/local #3.
 l+    (--)        Allocate 10 locals, [r0..r9].
-r3    (--n)       n: value of local #3.
-s3    (n--)       n: value to store in local #3.
-i3    (--)        Increment local #3.
-d3    (--)        Decrement local #3.
 l-    (--)        De-allocate the current set of locals.
-rC    (--n)       n: value of register C.
-sC    (n--)       n: value to store in register C.
-iC    (--)        Increment register C.
-dC    (--)        Decrement register C.
 
 
 *** WORDS/FUNCTIONS ***
-        NOTES: Function/word names are variable-length UPPERCASE words.
-               Use ":_ 0(code);" to create a function with no name.
+        NOTES: - Function/word names are variable-length UPPERCASE words.
+               - Use ":_ 0(code);" to create a function with no name.
 :FUNC (--)        Define word FUNC. Skip until next ';'.
 :_    (--A)       Define an anonymous word. A: current HERE. Skip until next ';'.
 FUNC  (--)        Execute/call word FUNC.
 ;     (--)        End of word definition. Exits word at run-time.
 ^     (--)        Exit word immediately.
-        NOTE: To exit a word while inside of a loop, use 'xU^'.
+        NOTE: To exit a word while inside a loop, use 'xU^'.
               example: :LOOPTEST 100 0[n.b n71=("-out" xU^)", "];
 x?FN (--a h)      a: BYTE address of FN, h: hash for "FN"
 
 
 *** VARIABLES/CONSTANTS ***
-        NOTES: Variable/constant names are variable-length UPPERCASE words starting with 'v'.
-               The same hash table is used for constant and function names.
-               A variable reference is really just a CONSTANT interpreted as an address.
-               vFUNCNAME will push the execution address of FUNCNAME on the stack.
+        NOTES: - Variable/constant names are variable-length UPPERCASE words starting with 'v'.
+               - s3 uses the same hash table is used for constant and function names.
+               - A variable reference is really just a CONSTANT interpreted as an address.
+               - vFUNCNAME will push the execution address of FUNCNAME on the stack.
 N:vXYZ; (N--)     N: Define variable address/constant vXYZ to be N.
 vXYZ    (--N)     N: value/address of vXYZ.
 vFUNC   (--N)     N: execution address of FUNC.
@@ -239,14 +241,14 @@ XYZ     (--)      Execute the code at the address referred to by vXYZ.
 
 
 *** INPUT/OUTPUT ***
-0-9    (--n)      Scan NUM decimal number. For multiple numbers, separate them by space (47 33).
-        NOTES: (1) To enter a negative number, use "negate" (eg - 490_).
-               (2) To enter a negative floating point number, use "Fnegate" (eg - 490.34f_).
+0-9    (--N)      Scan decimal number N. For multiple numbers, separate them by space (47 33).
+        NOTES: - To enter a negative number, use "negate" (eg - 490_).
+               - To enter a negative floating point number, use "Fnegate" (eg - 490.34f_).
 NNNe   (--F)      Scan floating point number (e.g. - 355e)
 NN.dd  (--F)      Scan floating point number (e.g. - 3.14159)
-'x     (--n)      n: the ASCII value of x.
-hNUM  (--h)       Scan NUM as a HEX number [0..9 or A..F].
-b%NUM (--h)       Scan NUM as a BINARY number [0..1].
+'x     (--N)      N: the ASCII value of x.
+hHHH   (--N)      Scan HEX number N. H:[0..9 or A..F].
+b%BBB  (--N)      Scan BINARY number N. B:[0..1].
 .      (N--)      Output N as decimal number.
 f.     (F--)      Output F as floating point number.
 ,      (N--)      Output N an ASCII character.
@@ -265,7 +267,7 @@ b      (--)       Output a single SPACE (NOTE: bit ops take precedence).
 `XXX`  (--)       Calls system("XXX"). (e.g. - `ls -l`)
 xY     (A--)      Sends string at BYTE address A to system() (example: 1000#|ls|\xY).
 |XXX|  (a--b)     Copies XXX to BYTE address a, b is the next address after the NULL terminator.
-x|XXX| (--a n)    a: BYTE address, n:number of chars.
+x|XXX| (--a n)    a: BYTE address of XXX, n:number of chars.
 z      (a--)      ZTYPE: Output the formatted string at BYTE address a (see ").
 t      (a--)      TYPE: Output the NULL-terminated string at BYTE address a (faster, no formatting).
 k?     (--f)      TODO: f: 1 if a character is waiting in the input buffer, else 0.
@@ -297,6 +299,7 @@ fL    (--)        Output list of file names
 
 
 *** OTHER ***
+1 l@  (--N)       N: size of a CELL (32-bit: 4, 64-bit: 8)
 xL    (NM--)      Load from file NM (eg - 1000#|tests|\xL)
 xPI   (p--)       Arduino: Pin Input  (pinMode(p, INPUT))
 xPU   (p--)       Arduino: Pin Pullup (pinMode(p, INPUT_PULLUP))

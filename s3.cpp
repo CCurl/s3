@@ -16,7 +16,8 @@ void init(int files) {
     for (int i = 0; i < VARS_SZ; i++) { st.i[i] = 0; }
     for (int i = 0; i <= MAX_FN; i++) { funcs[i] = 0; }
     if (files) { fpSp = 0; for (int i = 0; i < FILE_SZ; i++) { fpStk[i] = 0; } }
-    st.i[0] = h;
+    STI(0) = h;
+    STI(1) = sizeof(cell_t);
 }
 int funcN(int x) {
     cell_t hh = stb[x++];
