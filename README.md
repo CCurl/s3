@@ -196,6 +196,8 @@ l@    (a--n)      Fetch CELL n from CELL address a (long fetch).
 l!    (n a--)     Store CELL n to CELL address a (long store).
 @     (a--n)      Fetch CELL n from BYTE address a.
 !     (n a--)     Store CELL n to BYTE address a.
+b@    (a--b)      Fetch BYTE b from BYTE address a (byte fetch).
+b!    (b a--)     Store BYTE b to BYTE address a (byte store).
 c@    (a--b)      Fetch BYTE b from BYTE address a (char fetch).
 c!    (b a--)     Store BYTE b to BYTE address a (char store).
 w@    (a--w)      Fetch WORD w from BYTE address a.

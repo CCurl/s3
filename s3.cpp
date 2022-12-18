@@ -67,11 +67,17 @@ void dotQ(int delim) {
     if (delim) { ++p; }
 }
 #ifdef NEEDS_ALIGN
-void setCell() { *(cell_t*)&st.[TOS] = NOS }
-cell_t getCell() { return *(cell_t*)&st.[TOS] = NOS }
+void setCell(cell_t a, cell_t v) {
+    for (int i = 0; i < STI(1); i++) { STB(a++) = v&0xff; v= v>>8; }
+}
+cell_t getCell(cell_t a) {
+    cell_t ret = 0;
+    for (int i = 0; i < STI(1); i++) { ret = (ret << 8) | STB(a++); }
+    return ret;
+}
 #else
-void setCell(cell_t a, cell_t v) { *(cell_t*)&STB(a) = v; }
-cell_t getCell(cell_t a) { return *(cell_t*)&STB(a); }
+inline void setCell(cell_t a, cell_t v) { *(cell_t*)&STB(a) = v; }
+inline cell_t getCell(cell_t a) { return *(cell_t*)&STB(a); }
 #endif
 void fStore() { setCell(TOS, NOS); s -= 2; }
 void fFetch() { TOS = getCell(TOS); }
@@ -113,7 +119,7 @@ void fCreate() {
         if (stb[p]) { if (stb[p]<32) { stb[p]=32; } ++p; }
         else {
             if (fp == (cell_t)stdin) { printString(": "); }
-            doFgets((char*)&stb[p], 128, fp);
+            doFgets((char*)&stb[p], 256, fp);
         }
     }
     if (h < (++p)) { h=p; st.i[0]=h; }
@@ -150,7 +156,9 @@ void fSys() {
 }
 void fAbs() { TOS = (TOS < 0) ? -TOS : TOS; }
 void fBit() {
-    u = stb[p++]; if (u == '~') { TOS = ~TOS; }
+    u = stb[p++]; if (u == '@') { TOS = STB(TOS); }
+    else if (u == '!') { STB(TOS) = (uint8_t)NOS; s -= 2; }
+    else if (u == '~') { TOS = ~TOS; }
     else if (u == '&') { NOS &= TOS; s--; }
     else if (u == '|') { NOS |= TOS; s--; }
     else if (u == '^') { NOS ^= TOS; s--; }
@@ -159,8 +167,8 @@ void fBit() {
 }
 void fCOp() {
     u = stb[p++];
-    if (u == '@') { TOS = (uint8_t)stb[TOS]; }
-    else if (u == '!') { stb[TOS] = (uint8_t)NOS; s -= 2; }
+    if (u == '@') { TOS = STB(TOS); }
+    else if (u == '!') { STB(TOS) = (uint8_t)NOS; s -= 2; }
 }
 void fROp() {
     u = stb[p++];

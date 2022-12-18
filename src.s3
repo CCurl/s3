@@ -1,6 +1,6 @@
 xX 0(reset s3)
 :CR "%n";
-:CODE 0l@1[nc@#58=(ndc@59=("%n"),];
+:CODE 0l@1[nb@#,59=(CR)];
 :YN #("y")~("n");
 :REGS 'Zi'A[nl@(nl@n"%n%c: %d")];
 :HELLOWORLD "hello world!";
@@ -16,10 +16,9 @@ xX 0(reset s3)
 :MULTI "This"
 " is a multiline"
 " function";
-10000
-:vJMPTBL;
-:JTSET  0(a n--) 1l@*vJMPTBL+!;
-:JTGET  0(n--a)  1l@*vJMPTBL+@;
+100:vJMPTBL;
+:JTSET  0(a n--) vJMPTBL+l!;
+:JTGET  0(n--a)  vJMPTBL+l@;
 :JTEXEC 0(n--)   JTGETq<;
 :_"-anonynous A-"; 'A JTSET
 :_"-anonynous B-"; 'B JTSET
