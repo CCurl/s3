@@ -153,6 +153,7 @@ b~  (a--b)        b: NOT a (ones-complement, e.g - 101011 => 010100)
 $  (a b--b a)     Swap top 2 stack items           (Forth: SWAP)
 %  (a b--a b a)   Push 2nd                         (Forth: OVER)
 _  (a--b)         b: -a                            (Negate)
+f_ (f1--f2)       f2: -f1                          (Float Negate)
 a  (a--b)         b: ABS(a)                        (Absolute)
 i  (x--y)         y: x+1                           (Increment)
 d  (x--y)         y: x-1                           (Decrement)
@@ -207,13 +208,13 @@ m!    (b a--)     Store BYTE b to ABSOLUTE address a.
 
 
 *** REGISTERS and LOCALS ***
-        NOTES: - Register names are 1 UPPERCASE character: [A..Z].
+        NOTES: - Register names are 1 UPPERCASE character: [rA..rZ].
                - Registers are stored in CELL addresses 65-90 (rA='Al@, rZ='Zl@).
                - s3 allocates 10 locals at a time, [r0..r9].
-rX    (--n)       n: value of register/local #3.
-sX    (n--)       n: value to store in register/local #3.
-iX    (--)        Increment register/local #3.
-dX    (--)        Decrement register/local #3.
+rX    (--n)       n: value of register/local X.
+sX    (n--)       n: value to store in register/local X.
+iX    (--)        Increment register/local X.
+dX    (--)        Decrement register/local X.
 l+    (--)        Allocate 10 locals, [r0..r9].
 l-    (--)        De-allocate the current set of locals.
 
