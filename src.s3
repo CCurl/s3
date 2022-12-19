@@ -1,8 +1,8 @@
 xX 0(reset s3)
 :CR "%n";
-:CODE 0l@1[nb@#,59=(CR)];
+:CODE 0@1[nc@#,59=(CR)];
 :YN #("y")~("n");
-:REGS 'Zi'A[nl@(nl@n"%n%c: %d")];
+:REGS 'Zi'A[n@(n@n"%nr%c: %d")];
 :HELLOWORLD "hello world!";
 :LOCS s3 s4 i3 d4 r3 r4 + "locals: %d";
 :VER "s3 v0.0.1";
@@ -17,17 +17,16 @@ xX 0(reset s3)
 " is a multiline"
 " function";
 100:vJMPTBL;
-:JTSET  0(a n--) vJMPTBL+l!;
-:JTGET  0(n--a)  vJMPTBL+l@;
+:JTSET  0(a n--) vJMPTBL+!;
+:JTGET  0(n--a)  vJMPTBL+@;
 :JTEXEC 0(n--)   JTGETq<;
 :_"-anonynous A-"; 'A JTSET
 :_"-anonynous B-"; 'B JTSET
 :RELOAD 1000#|src.s3|\xL;
 :FILESZ l+ 0s8 0fO{#fR$\#(i8)}fC r8 l-;
 VER
-123 sA 44567 sZ
 CR 345.678 f. " (sb-345.678)"
-CR REGS
+123 sA 44567 sZ CR REGS
 CR HELLOWORLD
 CR 1 YN 0 YN
 CR 111 222 LOCS
@@ -39,4 +38,4 @@ CR MULTI
 CR 'A JTEXEC 'B JTEXEC
 CR CR CODE CR
 0(xQ)
-0l@1000+#|src.s3|\FILESZ"%n%d bytes in src.s3"
+0@1000+#|src.s3|\FILESZ"%n%d bytes in src.s3"

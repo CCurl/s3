@@ -79,8 +79,8 @@ cell_t getCell(cell_t a) {
 inline void setCell(cell_t a, cell_t v) { *(cell_t*)&STB(a) = v; }
 inline cell_t getCell(cell_t a) { return *(cell_t*)&STB(a); }
 #endif
-void fStore() { setCell(TOS, NOS); s -= 2; }
-void fFetch() { TOS = getCell(TOS); }
+void fStore() { st.i[TOS] = NOS; s -= 2; }
+void fFetch() { TOS = STI(TOS); }
 void fDotQ() { dotQ('"'); }
 void fDup() { t = TOS; PUSH(t); }
 void fSwap() { t = TOS; TOS = NOS; NOS = t; }
@@ -156,18 +156,15 @@ void fSys() {
 }
 void fAbs() { TOS = (TOS < 0) ? -TOS : TOS; }
 void fBit() {
-    u = stb[p++]; if (u == '@') { TOS = STB(TOS); }
-    else if (u == '!') { STB(TOS) = (uint8_t)NOS; s -= 2; }
-    else if (u == '~') { TOS = ~TOS; }
+    u = stb[p++]; if (u == '~') { TOS = ~TOS; }
     else if (u == '&') { NOS &= TOS; s--; }
     else if (u == '|') { NOS |= TOS; s--; }
     else if (u == '^') { NOS ^= TOS; s--; }
-    else if (u == '%') { PUSH(0); while (btw(stb[p],'0','1')) { TOS=(TOS*2)+stb[p++]-'0'; } }
-    else { putc(32, stdout); --p; }
+    else if (u == '%') { PUSH(0); while (btw(stb[p], '0', '1')) { TOS = (TOS * 2) + stb[p++] - '0'; } }
+    else { putC(32); --p; }
 }
 void fCOp() {
-    u = stb[p++];
-    if (u == '@') { TOS = STB(TOS); }
+    u = stb[p++]; if (u == '@') { TOS = STB(TOS); }
     else if (u == '!') { STB(TOS) = (uint8_t)NOS; s -= 2; }
 }
 void fROp() {
@@ -218,8 +215,8 @@ void fHex() {
 void fLoc() {
     u = stb[p++]; if (u == '+') { lb += (lb < LOCS_SZ) ? 10 : 0; }
     else if (u == '-') { lb -= (0<lb) ? 10 : 0; }
-    else if (u == '@') { TOS = STI(TOS); }
-    else if (u == '!') { st.i[TOS] = NOS; s -= 2; }
+    else if (u == '@') { TOS = getCell(TOS); }
+    else if (u == '!') { setCell(TOS, NOS); s -= 2; }
 }
 void fRegDec() {
     u = stb[p++];
