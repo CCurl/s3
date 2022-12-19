@@ -192,14 +192,12 @@ fT    (a--n)      n: TANH(a)
                - BYTE memory is used for CODE as well. Code starts at address 1.
                - To get the last allocated CODE address (aka - HERE), use 0 l@.
                - To size of a CELL in bytes, use 1 l@.
-l@    (a--n)      Fetch CELL n from CELL address a (long fetch).
-l!    (n a--)     Store CELL n to CELL address a (long store).
-@     (a--n)      Fetch CELL n from BYTE address a.
-!     (n a--)     Store CELL n to BYTE address a.
-b@    (a--b)      Fetch BYTE b from BYTE address a (byte fetch).
-b!    (b a--)     Store BYTE b to BYTE address a (byte store).
+@     (a--n)      Fetch CELL n from CELL address a.
+!     (n a--)     Store CELL n to CELL address a.
 c@    (a--b)      Fetch BYTE b from BYTE address a (char fetch).
 c!    (b a--)     Store BYTE b to BYTE address a (char store).
+l@    (a--n)      Fetch CELL n from BYTE address a (long fetch).
+l!    (n a--)     Store CELL n to BYTE address a (long store).
 w@    (a--w)      Fetch WORD w from BYTE address a.
 w!    (w a--)     Store WORD w to BYTE address a.
 m@    (a--b)      Fetch BYTE b from ABSOLUTE address a.
