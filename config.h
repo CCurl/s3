@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <string.h>
 
 // NOTE: change these for your application
 #ifdef __PC__
