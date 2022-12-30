@@ -276,12 +276,13 @@ k@     (--c)      c: next character from the input buffer. If no character, wait
 
 
 *** STRING OPERATIONS ***
+sa    (D S--D)    Append string at S to string at D (Append)
+sn    (S N--S)    Append the number N to the string at S (Append-Number)
 sc    (S C--S)    Concatenate char C to the string at S (concat Char)
 sd    (S D--S)    Concatenate digit D to the string at S (concat Digit)
 se    (S--E)      E: address of the NULL terminator for the string at S (End)
 sf    (S C--A)    A: address of first occurrence of char C in the string at S, 0 if not found (Find)
 sl    (S--S N)    N: length of the string at S (Length)
-so    (D S--D)    Concatenate source string at S to destination string at D (cOncat)
 ss    (D S--D)    Set the destination string at D from the source string at S (Set/copy)
 st    (D--D)      Truncate the string at S (Truncate)
 

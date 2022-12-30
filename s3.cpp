@@ -239,12 +239,13 @@ void fRegSet() {
     u = stb[p++]; 
     if (btw(u, 'A', 'Z')) { st.i[u] = POP; }
     else if (btw(u, '0', '9')) { locs[lb + u - '0'] = POP; }
+    else if (u == 'a') { strcat((char*)&stb[NOS], (char*)&stb[TOS]); s--; }
     else if (u == 'c') { t=NOS+strlen((char*)&stb[NOS]); stb[t++]=TOS; stb[t]=0; s--; }
     else if (u == 'd') { t=NOS+strlen((char*)&stb[NOS]); TOS+=(TOS>9)?7:0; stb[t++]=TOS+'0'; stb[t] = 0; s--; }
     else if (u == 'e') { t=strlen((char*)&stb[TOS]); TOS+=t; }
     else if (u == 'f') { t=POP; u=TOS; TOS=0; while (stb[u]&&(TOS==0)) { if (stb[u]==t) { TOS=u; } else { u++; } } }
     else if (u == 'l') { t=strlen((char*)&stb[TOS]); PUSH(t); }
-    else if (u == 'o') { strcat((char*)&stb[NOS], (char*)&stb[TOS]); s--; }
+    else if (u == 'n') { char z[20]; sprintf(z,"%ld",POP); y=(char*)&stb[TOS]; strcat(y, z); }
     else if (u == 's') { strcpy((char*)&stb[NOS], (char*)&stb[TOS]); s--; }
     else if (u == 't') { stb[TOS]=0; }
 }
