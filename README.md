@@ -116,7 +116,7 @@ Many interpreted environments have a large SWITCH statement with cases in a loop
     10000:vJUMPTABLE;
     :JTSET  0(a n--) 1l@*vJUMPTABLE+!;
     :JTGET  0(n--a)  1l@*vJUMPTABLE+@;
-    :JTEXEC 0(n--)   JTGETq<;
+    :JTEXEC 0(n--)   JTGETr<;
     :_"-this is A-"; 'A JTSET
     :_"-this is B-"; 'B JTSET
     'A JTEXEC
@@ -158,9 +158,9 @@ a  (a--b)         b: ABS(a)                        (Absolute)
 i  (x--y)         y: x+1                           (Increment)
 d  (x--y)         y: x-1                           (Decrement)
 xS (--)           Print the contents of the stack  (Forth: .S)
-q< (n--)          Move TOS to return stack         (Forth: >R)
-q@ (--n)          Copy return stack TOS            (Forth: R@)
-q> (--n)          Move return stack TOS back       (Forth: R>)
+r< (n--)          Move TOS to return stack         (Forth: >R)
+r@ (--n)          Copy RTOS to stack               (Forth: R@)
+r> (--n)          Move RTOS back to stack          (Forth: R>)
 
 
 *** FLOATING POINT ***

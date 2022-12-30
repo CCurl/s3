@@ -19,7 +19,7 @@ xX 0(reset s3)
 100:vJMPTBL;
 :JTSET  0(a n--) vJMPTBL+!;
 :JTGET  0(n--a)  vJMPTBL+@;
-:JTEXEC 0(n--)   JTGETq<;
+:JTEXEC 0(n--)   JTGETr<;
 :_"-anonynous A-"; 'A JTSET
 :_"-anonynous B-"; 'B JTSET
 :RELOAD 1000#|src.s3|\xL;
@@ -35,7 +35,7 @@ CR "DO-BENCH " 200 2 BENCHES
 CR ULTESTD "-back"
 CR ULTESTW "-back"
 CR MULTI
-CR 'A JTEXEC 'B JTEXEC
+CR 'A JTEXEC 'B JTEXEC CR
 CR CR CODE CR
 0(xQ)
 0@1000+#|src.s3|\FILESZ"%n%d bytes in src.s3"
