@@ -312,7 +312,7 @@ fL    (--)        Output list of file names
 
 
 *** OTHER ***
-1 l@  (--N)       N: size of a CELL in bytes.
+1@    (--N)       N: size of a CELL in bytes.
 xL    (NM--)      Load from file NM (eg - 0 l@ 10+#|tests|\xL)
 xPI   (p--)       Arduino: Open Pin Input (pinMode(p, INPUT))
 xPU   (p--)       Arduino: Open Pin Pullup (pinMode(p, INPUT_PULLUP))
