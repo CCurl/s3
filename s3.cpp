@@ -277,6 +277,7 @@ void fExt() {
     else if (u == 'S') { fDotS(); }
     else if (u == '?') { fLookup(); }
     else if (u == 'X') { init(0); p=0; } // Reset
+    else if (u == 'V') { PUSH(10000); } // 1.0.0
     else if (u == 'Q') { exit(0); } // Exit s3
 }
 void fUser() { p = doUser(u, p); }
