@@ -284,7 +284,7 @@ se    (S--E)      E: address of the NULL terminator for the string at S (End)
 sf    (S C--A)    A: address of first occurrence of char C in the string at S, 0 if not found (Find)
 sl    (S--S N)    N: length of the string at S (Length)
 ss    (D S--D)    Set the destination string at D from the source string at S (Set/copy)
-st    (D--D)      Truncate the string at S (Truncate)
+st    (S--S)      Truncate the string at S (Truncate)
 
 
 *** CONDITIONS/LOOPS/FLOW CONTROL ***
