@@ -35,6 +35,7 @@
     #define LOCS_SZ             90
     #define LOOP_SZ             30
     #define MAX_FN          0x0FFF
+    #define               NEEDS_ALIGN
     #define mySerial        Serial
     #define FILES_IMPL   "file-teensy.h"
     #include "LittleFS.h"
