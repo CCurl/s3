@@ -107,14 +107,13 @@ void n09() {
 }
 void fVar() { p = funcN(p); PUSH(fa); }
 void fCreate() {
-    cell_t cur = p, isVar = 0;
-    u=1; if (stb[p] == 'v') { isVar = 1; ++p; }
-    if (stb[p] == '_') { PUSH(++p); u=0; }
-    if (u) { p = funcN(p); }
-    if (u && fa) { printStringF("-redef:%ld to %ld,hash(%ld)-", fa, cur, fn); }
+    cell_t cur=p, isVar=(stb[p]=='v'), isUs=(stb[p]=='_');
+    if (isVar) { ++p; }
+    if (isUs) { PUSH(++p); } else { p = funcN(p); }
+    if ((!isUs) && fa) { printStringF("-redef:%ld to %ld,hash(%ld)-", fa, cur, fn); }
     while (stb[p] == ' ') { ++p; }
     if (isVar) { funcs[fn] = POP; }
-    else if (u) { funcs[fn] = p; }
+    else { if (!isUs) { funcs[fn] = p; } }
     while (stb[p] != ';') {
         if (stb[p]) { if (stb[p]<32) { stb[p]=32; } ++p; }
         else {
