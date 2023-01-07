@@ -25,7 +25,7 @@ int funcN(int x) {
     fn = (hh & MAX_FN); fa = funcs[fn];
     return x;
 }
-void X() { if (u) { printStringF("-IR %ld (%c)?", u, (char)u); } p = 0; }
+void X() { u=STB(p-1); if (u) { printStringF("-IR %ld (%c)?", u, (char)u); } p = 0; }
 void N() {}
 void fSystem() { system((char*)POP); }
 void fOpen() { t = POP; y = (char*)&stb[TOS]; TOS = doFopen(y, t); }
@@ -96,7 +96,7 @@ void fSub() { NOS -= TOS; s--; }
 void fMult() { NOS *= TOS; s--; }
 void fDiv() { NOS /= TOS; s--; }
 void n09() {
-    PUSH(u - '0');
+    PUSH(STB(p-1) - '0');
     while (btw(stb[p],'0','9')) { TOS=(TOS*10)+stb[p++]-'0'; }
     if (stb[p] == 'e') { ++p; FTOS = (float)TOS; }
     else if (stb[p] == '.') { 
@@ -108,7 +108,7 @@ void n09() {
 void fVar() { p = funcN(p); PUSH(fa); }
 void fCreate() {
     cell_t cur = p, isVar = 0;
-    if (stb[p] == 'v') { isVar = 1; ++p; }
+    u=1; if (stb[p] == 'v') { isVar = 1; ++p; }
     if (stb[p] == '_') { PUSH(++p); u=0; }
     if (u) { p = funcN(p); }
     if (u && fa) { printStringF("-redef:%ld to %ld,hash(%ld)-", fa, cur, fn); }
@@ -297,7 +297,7 @@ void (*jmpTbl[128])() = {
 void Run(int x) { 
     s=(s<sb)?(sb-1):s; r=rb; lsp=0; p=x;
     while (p) {
-        u=stb[p++]; jmpTbl[u]();
+        jmpTbl[stb[p++]]();
 #ifdef __DEBUG__
         fCheckStk();
 #endif
