@@ -314,7 +314,8 @@ fL    (--)        Output list of file names
 *** OTHER ***
 0@    (--H)       H: HERE - last used code address.
 1@    (--N)       N: Number of bytes in a CELL.
-xL    (NM--)      Load from file NM (eg - 0 l@ 10+#|tests|\xL)
+xE    (A--)       A: address of a s3 string to execute.
+xL    (NM--)      Load from file NM (eg - 0@ 32+#|tests|\xL)
 xPI   (p--)       Arduino: Open Pin Input (pinMode(p, INPUT))
 xPU   (p--)       Arduino: Open Pin Pullup (pinMode(p, INPUT_PULLUP))
 xPO   (p--)       Arduino: Open Pin Output (pinMode(p, OUTPUT)
