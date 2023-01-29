@@ -10,6 +10,8 @@ cell_t locs[LOCS_SZ+10], lb, lstk[LOOP_SZ+1], lsp;
 cell_t h, sb = 4, rb = 64, r, s, t, u, fpSp;
 cell_t fn, fa, p, sd, fp, funcs[MAX_FN+1], fpStk[FILE_SZ];
 
+void Run(int x, int clr);
+
 void init(int files) {
     s = sb - 1; h = 1; lb = lsp = 0;
     for (int i = 0; i < CODE_SZ; i++) { stb[i] = 0; }
@@ -25,7 +27,7 @@ int funcN(int x) {
     fn = (hh & MAX_FN); fa = funcs[fn];
     return x;
 }
-void X() { if (u) { printStringF("-IR %ld (%c)?", u, (char)u); } p = 0; }
+void X() { u=STB(p-1); if (u) { printStringF("-IR %ld (%c)?", u, (char)u); } p = 0; }
 void N() {}
 void fSystem() { system((char*)POP); }
 void fOpen() { t = POP; y = (char*)&stb[TOS]; TOS = doFopen(y, t); }
@@ -96,7 +98,7 @@ void fSub() { NOS -= TOS; s--; }
 void fMult() { NOS *= TOS; s--; }
 void fDiv() { NOS /= TOS; s--; }
 void n09() {
-    PUSH(u - '0');
+    PUSH(STB(p-1) - '0');
     while (btw(stb[p],'0','9')) { TOS=(TOS*10)+stb[p++]-'0'; }
     if (stb[p] == 'e') { ++p; FTOS = (float)TOS; }
     else if (stb[p] == '.') { 
@@ -107,14 +109,13 @@ void n09() {
 }
 void fVar() { p = funcN(p); PUSH(fa); }
 void fCreate() {
-    cell_t cur = p, isVar = 0;
-    if (stb[p] == 'v') { isVar = 1; ++p; }
-    if (stb[p] == '_') { PUSH(++p); u=0; }
-    if (u) { p = funcN(p); }
-    if (u && fa) { printStringF("-redef:%ld to %ld,hash(%ld)-", fa, cur, fn); }
+    cell_t cur=p, isVar=(stb[p]=='v'), isUs=(stb[p]=='_');
+    if (isVar) { ++p; }
+    if (isUs) { PUSH(++p); } else { p = funcN(p); }
+    if ((!isUs) && fa) { printStringF("-redef:%ld to %ld,hash(%ld)-", fa, cur, fn); }
     while (stb[p] == ' ') { ++p; }
     if (isVar) { funcs[fn] = POP; }
-    else if (u) { funcs[fn] = p; }
+    else { if (!isUs) { funcs[fn] = p; } }
     while (stb[p] != ';') {
         if (stb[p]) { if (stb[p]<32) { stb[p]=32; } ++p; }
         else {
@@ -278,6 +279,7 @@ void fExt() {
     else if (u == '?') { fLookup(); }
     else if (u == 'X') { init(0); p=0; } // Reset
     else if (u == 'V') { PUSH(10000); } // 1.0.0
+    else if (u == 'E') { Run(POP, 0); }
     else if (u == 'Q') { exit(0); } // Exit s3
 }
 void fUser() { p = doUser(u, p); }
@@ -294,10 +296,14 @@ void (*jmpTbl[128])() = {
     fSys,fAbs,fBit,fCOp,fRegDec,X,fFloat,X,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,          //  96:111
     X,X,fRegGet,fRegSet,fType,fUser,fVar,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };   // 112:127
 
-void Run(int x) { 
-    s=(s<sb)?(sb-1):s; r=rb; lsp=0; p=x;
+void Run(int x, int clr) {
+    if (clr) {
+        s=(s<sb)?(sb-1):s; 
+        r=rb; lsp=0;
+    }
+    p = x;
     while (p) {
-        u=stb[p++]; jmpTbl[u]();
+        jmpTbl[stb[p++]]();
 #ifdef __DEBUG__
         fCheckStk();
 #endif
@@ -314,7 +320,7 @@ void Loop() {
     if (fp == (cell_t)stdin) { printString("\ns3:"); fDotS(); putC('>'); }
     y = (char*)&stb[h]; *y = 0; doFgets(y, 128, fp);
     if (fp == (cell_t)stdin) { Hist(y); }
-    Run(h);
+    Run(h, 1);
 }
 int main(int argc, char* argv[]) {
     init(1);
