@@ -279,7 +279,7 @@ void fExt() {
     else if (u == '?') { fLookup(); }
     else if (u == 'X') { init(0); p=0; } // Reset
     else if (u == 'V') { PUSH(10000); } // 1.0.0
-    else if (u == 'E') { Run(POP, 0); }
+    else if (u == 'E') { cell_t x=p; Run(POP, 0); p=x; }
     else if (u == 'Q') { exit(0); } // Exit s3
 }
 void fUser() { p = doUser(u, p); }
@@ -296,7 +296,7 @@ void (*jmpTbl[128])() = {
     fSys,fAbs,fBit,fCOp,fRegDec,X,fFloat,X,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,          //  96:111
     X,X,fRegGet,fRegSet,fType,fUser,fVar,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };   // 112:127
 
-void Run(int x, int clr) {
+void Run(cell_t x, int clr) {
     if (clr) {
         s=(s<sb)?(sb-1):s; 
         r=rb; lsp=0;
