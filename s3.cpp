@@ -10,6 +10,8 @@ cell_t locs[LOCS_SZ+10], lb, lstk[LOOP_SZ+1], lsp;
 cell_t h, sb = 4, rb = 64, r, s, t, u, fpSp;
 cell_t fn, fa, p, sd, fp, funcs[MAX_FN+1], fpStk[FILE_SZ];
 
+void Run(int x, int clr);
+
 void init(int files) {
     s = sb - 1; h = 1; lb = lsp = 0;
     for (int i = 0; i < CODE_SZ; i++) { stb[i] = 0; }
@@ -277,6 +279,7 @@ void fExt() {
     else if (u == '?') { fLookup(); }
     else if (u == 'X') { init(0); p=0; } // Reset
     else if (u == 'V') { PUSH(10000); } // 1.0.0
+    else if (u == 'E') { Run(POP, 0); }
     else if (u == 'Q') { exit(0); } // Exit s3
 }
 void fUser() { p = doUser(u, p); }
@@ -293,8 +296,12 @@ void (*jmpTbl[128])() = {
     fSys,fAbs,fBit,fCOp,fRegDec,X,fFloat,X,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,          //  96:111
     X,X,fRegGet,fRegSet,fType,fUser,fVar,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };   // 112:127
 
-void Run(int x) { 
-    s=(s<sb)?(sb-1):s; r=rb; lsp=0; p=x;
+void Run(int x, int clr) {
+    if (clr) {
+        s=(s<sb)?(sb-1):s; 
+        r=rb; lsp=0;
+    }
+    p = x;
     while (p) {
         jmpTbl[stb[p++]]();
 #ifdef __DEBUG__
@@ -313,7 +320,7 @@ void Loop() {
     if (fp == (cell_t)stdin) { printString("\ns3:"); fDotS(); putC('>'); }
     y = (char*)&stb[h]; *y = 0; doFgets(y, 128, fp);
     if (fp == (cell_t)stdin) { Hist(y); }
-    Run(h);
+    Run(h, 1);
 }
 int main(int argc, char* argv[]) {
     init(1);
