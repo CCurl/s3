@@ -10,7 +10,7 @@ cell_t locs[LOCS_SZ+10], lb, lstk[LOOP_SZ+1], lsp;
 cell_t h, sb = 4, rb = 64, r, s, t, u, fpSp;
 cell_t fn, fa, p, sd, fp, funcs[MAX_FN+1], fpStk[FILE_SZ];
 
-void Run(int x, int clr);
+void Run(cell_t x, int clr);
 
 void init(int files) {
     s = sb - 1; h = 1; lb = lsp = 0;
