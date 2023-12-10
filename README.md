@@ -254,6 +254,7 @@ b%BBB  (--N)      Scan BINARY number N. B:[0..1].
 f.     (F--)      Output F as floating point number.
 ,      (N--)      Output N an ASCII character.
 b      (--)       Output a single SPACE (NOTE: bit ops take precedence).
+e      (--)       Output an EOL (13,10)
 "      (?--?)     Output a formatted string until the next '"'.
     NOTES: - %d outputs TOS as an integer
            - %b outputs TOS as a binary number
@@ -294,6 +295,7 @@ st    (S--S)      Truncate the string at S (Truncate)
 ~     (n -- f)    f: (a = 0) ? 1 : 0; (Logical NOT)
 [     (T F--)     DO: start a DO/LOOP (aka-FOR/NEXT) loop.
 n     (--n)       n: the index of the current DO loop
+j     (--n)       n: the index of the next outer DO loop
 ]     (--)        LOOP: increment index (n) and stop if (T<=n)
 x]    (N--)       +LOOP: Add N to the index (n) and stop if (n==T) or (n crosses T)
 {     (--)        Start a BEGIN/WHILE loop

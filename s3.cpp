@@ -148,6 +148,7 @@ void fLoop() { if (++L0 < L1) { p = L2; } else { lsp -= 3; } }
 void fBegin() { lsp += 3; L0 = p; }
 void fWhile() { if (POP) { p = L0; } else { lsp -= 3; } }
 void fIndex() { PUSH(L0); }
+void fIndex2() { PUSH(lstk[lsp-3]); }
 void fLeave() { p = st.i[r++]; }
 void fNeg() { TOS = -TOS; }
 void fSys() {
@@ -173,6 +174,7 @@ void fWord() {
     if (u == '@') { TOS = (stb[TOS + 1] << 8) | stb[TOS]; }
     else if (u == '!') { stb[TOS] = (uint8_t)NOS; stb[TOS + 1] = (uint8_t)(NOS >> 8); s -= 2; }
 }
+void fEOL() { putC(13); putC(10); }
 void fFloat() {
     u = stb[p++];
     if (u == '.') { printStringF("%g", st.f[s--]); }
@@ -293,7 +295,7 @@ void (*jmpTbl[128])() = {
     n09,n09,n09,n09,n09,n09,n09,n09,n09,n09,fCreate,fRet,fLT,fEq,fGT,X,                     //  48:63
     fFetch,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,                                    //  64:79
     AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,AZ,fDo,fDrop,fLoop,fLeave,fNeg,                           //  80:95
-    fSys,fAbs,fBit,fCOp,fRegDec,X,fFloat,X,fHex,fRegInc,X,fKey,fLoc,fMOp,fIndex,X,          //  96:111
+    fSys,fAbs,fBit,fCOp,fRegDec,fEOL,fFloat,X,fHex,fRegInc,fIndex2,fKey,fLoc,fMOp,fIndex,X, //  96:111
     X,X,fRegGet,fRegSet,fType,fUser,fVar,fWord,fExt,X,fZType,fBegin,fQt,fWhile,fLNot,X };   // 112:127
 
 void Run(cell_t x, int clr) {
